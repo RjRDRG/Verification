@@ -1,10 +1,14 @@
 package validation.result;
 
 public class Parameter {
-    String newKey;
-    String oldKey;
+    final String key;
+    boolean satisfied;
+    boolean ambiguous;
+    ResolutionRule resolutionRule;
+    String[] resolutionArgs;
 
-    public Parameter() {
-
+    public Parameter(String key) {
+        this.key = key;
+        this.satisfied = false;
     }
 }

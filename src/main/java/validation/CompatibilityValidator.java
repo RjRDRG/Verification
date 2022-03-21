@@ -2,12 +2,8 @@ package validation;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import utils.APIUtils;
-import validation.result.Endpoint;
 import validation.result.Result;
 import validation.evolutions.IEvolver;
-import validation.result.Soundness;
-
-import java.util.List;
 
 public class CompatibilityValidator {
 
