@@ -1,5 +1,7 @@
 package validation.result;
 
+import validation.http.Endpoint;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,12 +15,24 @@ public class Result {
         endpoints = new LinkedList<>();
     }
 
-    public void setEndpoints(List<Endpoint> endpoints) {
-        this.endpoints = endpoints;
+    public void copyValues(Result result) {
+        this.soundness = result.soundness;
+        this.endpoints = result.endpoints;
     }
 
-    public Soundness checkSoundness() {
-        return null;
+    public Soundness getSoundness() {
+        return soundness;
     }
 
+    public void setSoundness(Soundness soundness) {
+        this.soundness = soundness;
+    }
+
+    public List<Endpoint> getEndpoints() {
+        return endpoints;
+    }
+
+    public void addEndpoint(Endpoint endpoint) {
+        this.endpoints.add(endpoint);
+    }
 }

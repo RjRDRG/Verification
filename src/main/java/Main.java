@@ -1,46 +1,33 @@
+import contract.ContractHTTP;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import validation.CompatibilityValidator;
+import io.swagger.v3.parser.core.models.ParseOptions;
+import validation.resolution.SimpleResolutionAdviser;
+import validation.result.ResultIO;
+import validation.ContractValidatorHTTP;
 import validation.result.Result;
-import validation.evolutions.*;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.*;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
 
-        OpenAPI oldV = new OpenAPIParser().readLocation("./src/main/resources/old.yml", null, null).getOpenAPI();
-        OpenAPI newV = new OpenAPIParser().readLocation("./src/main/resources/new.yml", null, null).getOpenAPI();
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
 
-        CompatibilityValidator validator = new CompatibilityValidator(
-                new ParameterAddition(),
-                new ParameterRemoval(),
-                new ParameterRename()
+        OpenAPI oldV = new OpenAPIParser().readLocation("./src/main/resources/old.yml", null, parseOptions).getOpenAPI();
+        OpenAPI newV = new OpenAPIParser().readLocation("./src/main/resources/new.yml", null, parseOptions).getOpenAPI();
+
+        ContractValidatorHTTP validator = new ContractValidatorHTTP(
+                new ContractHTTP(oldV),
+                new ContractHTTP(newV),
+                new SimpleResolutionAdviser()
         );
 
-        Result result = validator.process(oldV, newV);
-
-        writeResultToFile(result);
-    }
-
-
-
-    private static void writeResultToFile(Result result) {
-        try {
-            PrintWriter writer = new PrintWriter("./src/main/resources/result.yml");
-            DumperOptions options = new DumperOptions();
-            options.setIndent(2);
-            options.setPrettyFlow(true);
-            options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-            Yaml yaml = new Yaml(options);
-            yaml.dump(result, writer);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        Result result = validator.process();
+        ResultIO.output(result);
     }
 
 }
