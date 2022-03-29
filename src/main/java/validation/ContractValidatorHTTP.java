@@ -1,6 +1,9 @@
 package validation;
 
-import contract.ContractHTTP;
+import contract.structures.Endpoint;
+import contract.IHTTPContract;
+import contract.structures.Property;
+import contract.structures.PropertyKey;
 import validation.http.*;
 import validation.resolution.IResolutionAdviser;
 import validation.resolution.Resolution;
@@ -11,18 +14,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static validation.http.Method.MISSING;
+import static contract.structures.Endpoint.Method.MISSING;
 
 public class ContractValidatorHTTP {
 
-    ContractHTTP oldContract;
-    ContractHTTP newContract;
+    IHTTPContract oldContract;
+    IHTTPContract newContract;
 
     IResolutionAdviser resolutionBuilder;
 
     Result result;
 
-    public ContractValidatorHTTP(ContractHTTP oldContract, ContractHTTP newContract, IResolutionAdviser resolutionBuilder) {
+    public ContractValidatorHTTP(IHTTPContract oldContract, IHTTPContract newContract, IResolutionAdviser resolutionBuilder) {
         this.oldContract = oldContract;
         this.newContract = newContract;
         this.resolutionBuilder = resolutionBuilder;
@@ -32,12 +35,12 @@ public class ContractValidatorHTTP {
     public Result process() throws FileNotFoundException {
         processEndpoints();
 
-        for (Endpoint endpoint: result.getEndpoints()) {
-            processRequest(endpoint);
+        for (Method method : result.getEndpoints()) {
+            processRequest(method);
         }
 
-        for (Endpoint endpoint: result.getEndpoints()) {
-            processResponse(endpoint);
+        for (Method method : result.getEndpoints()) {
+            processResponse(method);
         }
 
         return result;
@@ -46,17 +49,17 @@ public class ContractValidatorHTTP {
     // ENDPOINT --------------------------------------------------------------------------------------------------------
 
     public void processEndpoints() throws FileNotFoundException {
-        Set<EndpointKey> newEndpoints = newContract.extractEndpointsKeys();
-        Set<EndpointKey> oldEndpoints = oldContract.extractEndpointsKeys();
+        Set<Endpoint> newEndpoints = newContract.getEndpoints();
+        Set<Endpoint> oldEndpoints = oldContract.getEndpoints();
 
         boolean missingEndpoints = false;
-        for (EndpointKey key: newEndpoints) {
+        for (Endpoint key: newEndpoints) {
             if(oldEndpoints.contains(key)) {
-                result.addEndpoint(new Endpoint(key, key));
+                result.addEndpoint(new Method(key, key));
             }
             else {
                 missingEndpoints = true;
-                result.addEndpoint(new Endpoint(key, new EndpointKey("MISSING", MISSING)));
+                result.addEndpoint(new Method(key, new Endpoint("MISSING", MISSING)));
             }
         }
 
@@ -71,21 +74,39 @@ public class ContractValidatorHTTP {
 
     // REQUEST ---------------------------------------------------------------------------------------------------------
 
-    private void processRequest(Endpoint endpoint) {
-        Request request = endpoint.request;
+    private void processRequest(Method method) {
+        Request request = method.request;
 
-        Set<Property> newP = newContract.extractRequestParameterProperties(endpoint.key);
-        Set<Property> oldP = oldContract.extractRequestParameterProperties(endpoint.oldKey);
+        Set<Property> newP = newContract.getRequestProperties(method.newEndpoint);
+        Set<Property> oldP = oldContract.getRequestProperties(method.oldEndpoint);
 
         Set<Parameter> parameters = new HashSet<>();
+        Set<Field> fields = new HashSet<>();
 
         Set<Property> intersection = new HashSet<>(newP);
         intersection.retainAll(oldP);
 
         for (Property p : intersection) {
-            Parameter parameter = new Parameter(p.key, p.location);
-            parameter.setResolution(Resolution.keyResolution(p.key, p.location));
-            parameters.add(parameter);
+            if(p.key.type == PropertyKey.Type.PARAMETER) {
+                Parameter parameter = new Parameter(p.key);
+                if(!p.array) {
+                    parameter.setResolution(Resolution.keyResolution(p.key));
+                }
+                else {
+                    parameter.setSuggestions(List.of(Resolution.keyResolution(p.key)));
+                }
+                parameters.add(parameter);
+            }
+            else if(p.key.type == PropertyKey.Type.BODY) {
+                Field field = new Field(p.key);
+                if(!p.array) {
+                    field.setResolution(Resolution.keyResolution(p.key));
+                }
+                else {
+                    field.setSuggestions(List.of(Resolution.keyResolution(p.key)));
+                }
+                fields.add(field);
+            }
         }
 
         Set<Property> unmapped = new HashSet<>(newP);
@@ -97,18 +118,25 @@ public class ContractValidatorHTTP {
         for(Property p : unmapped) {
             List<Resolution> suggestions = resolutionBuilder.solve(p, unused);
 
-            Parameter parameter = new Parameter(p.key, p.location);
-            parameter.setSuggestions(suggestions);
+            if(p.key.type == PropertyKey.Type.PARAMETER) {
+                Parameter parameter = new Parameter(p.key);
+                parameter.setSuggestions(suggestions);
 
-            parameters.add(parameter);
+                parameters.add(parameter);
+            }
+            else if(p.key.type == PropertyKey.Type.BODY) {
+
+            }
         }
+
+        //newContract.getPropertySuccessors(method.key, new PropertyKey(PropertyKey.Type.BODY, location, Collections.emptyList(), null));
 
         request.setParameters(parameters);
     }
 
     // RESPONSE --------------------------------------------------------------------------------------------------------
 
-    private void processResponse(Endpoint endpoint) {
+    private void processResponse(Method method) {
 
     }
 

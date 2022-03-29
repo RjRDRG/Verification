@@ -1,5 +1,6 @@
 package validation.http;
 
+import contract.structures.PropertyKey;
 import validation.resolution.Resolution;
 
 import java.util.LinkedList;
@@ -8,14 +9,12 @@ import java.util.Objects;
 
 public class Parameter {
     public final String key;
-    public final String location;
 
     Resolution resolution;
     List<Resolution> suggestions;
 
-    public Parameter(String key, String location) {
-        this.key = key;
-        this.location = location;
+    public Parameter(PropertyKey key) {
+        this.key = key.toString();
 
         this.resolution = null;
         suggestions = new LinkedList<>();
@@ -42,11 +41,11 @@ public class Parameter {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Parameter parameter = (Parameter) o;
-        return key.equals(parameter.key) && location.equals(parameter.location);
+        return key.equals(parameter.key);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key, location);
+        return Objects.hash(key);
     }
 }

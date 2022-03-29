@@ -1,6 +1,6 @@
 package validation.resolution;
 
-import validation.http.Property;
+import contract.structures.Property;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -20,22 +20,22 @@ public class SimpleResolutionAdviser implements IResolutionAdviser {
 
         //PARAMETER RENAME
         for(Property op : ops) {
-            if(op.type.equals(np.type) && op.location.equals(np.location)) {
-                suggestions.add(Resolution.keyResolution(op.key, op.location));
+            if(op.primitive.equals(np.primitive) && op.location.equals(np.location)) {
+                suggestions.add(Resolution.parameterKeyResolution(op.key, op.location));
             }
         }
 
         //PARAMETER LOCATION CHANGE
         for(Property op : ops) {
-            if(op.type.equals(np.type) && op.key.equals(np.key)) {
-                suggestions.add(Resolution.keyResolution(op.key, op.location));
+            if(op.primitive.equals(np.primitive) && op.key.equals(np.key)) {
+                suggestions.add(Resolution.parameterKeyResolution(op.key, op.location));
             }
         }
 
         //PARAMETER RENAME AND LOCATION CHANGE
         for (Property op : ops) {
-            if (op.type.equals(np.type)) {
-                suggestions.add(Resolution.keyResolution(op.key, op.location));
+            if (op.primitive.equals(np.primitive)) {
+                suggestions.add(Resolution.parameterKeyResolution(op.key, op.location));
             }
         }
 

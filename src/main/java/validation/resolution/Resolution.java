@@ -1,30 +1,35 @@
 package validation.resolution;
 
+import contract.structures.PropertyKey;
+
 import java.util.Map;
 
 public class Resolution {
-    public final ResolutionRule resolutionRule;
+
+    public enum Rule {LINK, DEFAULT_VALUE, FUNCTION}
+    public final Rule rule;
+
+    public enum ARG_TYPE {KEY, DEFAULT_VALUE}
     public final Map<ARG_TYPE, String> resolutionArgs;
 
-    public enum ARG_TYPE {NAME, LOCATION, DEFAULT_VALUE}
-
-    private Resolution(ResolutionRule resolutionRule, Map<ARG_TYPE, String> resolutionArgs) {
-        this.resolutionRule = resolutionRule;
+    private Resolution(Rule rule, Map<ARG_TYPE, String> resolutionArgs) {
+        this.rule = rule;
         this.resolutionArgs = resolutionArgs;
     }
 
-    public static Resolution keyResolution(String name, String location) {
+    public static Resolution keyResolution(PropertyKey key) {
         Map<ARG_TYPE, String> args = Map.of(
-                ARG_TYPE.NAME, name,
-                ARG_TYPE.LOCATION, location
+                ARG_TYPE.KEY, key.toString()
         );
-        return new Resolution(ResolutionRule.KEY, args);
+        return new Resolution(Rule.LINK, args);
     }
 
     public static Resolution defaultValueResolution(String defaultValue) {
         Map<ARG_TYPE, String> args = Map.of(
                 ARG_TYPE.DEFAULT_VALUE, defaultValue
         );
-        return new Resolution(ResolutionRule.DEFAULT_VALUE, args);
+        return new Resolution(Rule.DEFAULT_VALUE, args);
     }
+
+
 }

@@ -1,12 +1,14 @@
-package validation.http;
+package contract.structures;
 
 import java.util.Objects;
 
-public class EndpointKey {
+public class Endpoint {
+    public enum Method {MISSING, GET, PUT, POST, DELETE, PATCH, OPTIONS, HEAD, TRACE }
+
     public final String path;
     public final Method method;
 
-    public EndpointKey(String path, Method method) {
+    public Endpoint(String path, Method method) {
         this.path = path;
         this.method = method;
     }
@@ -14,8 +16,8 @@ public class EndpointKey {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof EndpointKey)) return false;
-        EndpointKey that = (EndpointKey) o;
+        if (!(o instanceof Endpoint)) return false;
+        Endpoint that = (Endpoint) o;
         return path.equals(that.path) && method == that.method;
     }
 

@@ -1,4 +1,4 @@
-import contract.ContractHTTP;
+import contract.HTTPContractOpenAPI;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.ParseOptions;
@@ -21,8 +21,8 @@ public class Main {
         OpenAPI newV = new OpenAPIParser().readLocation("./src/main/resources/new.yml", null, parseOptions).getOpenAPI();
 
         ContractValidatorHTTP validator = new ContractValidatorHTTP(
-                new ContractHTTP(oldV),
-                new ContractHTTP(newV),
+                new HTTPContractOpenAPI(oldV),
+                new HTTPContractOpenAPI(newV),
                 new SimpleResolutionAdviser()
         );
 

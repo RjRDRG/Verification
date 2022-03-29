@@ -1,6 +1,6 @@
 package validation.resolution;
 
-import validation.http.Property;
+import contract.structures.Property;
 
 import java.util.List;
 import java.util.Set;
