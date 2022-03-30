@@ -13,7 +13,7 @@ public interface IHTTPContract {
 
     Set<Property> getRequestProperties(Endpoint endpoint);
 
-    Set<Property> getResponseProperties(Endpoint endpoint);
+    List<String> getResponses(Endpoint endpoint);
 
-    List<String> getPropertySuccessors(Endpoint endpoint, PropertyKey propertyKey);
+    Set<Property> getResponseProperties(Endpoint endpoint, String status);
 }

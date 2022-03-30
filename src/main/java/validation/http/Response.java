@@ -5,6 +5,7 @@ import java.util.List;
 
 public class Response {
 
+    String status;
     List<Parameter> parameters;
 
     public Response() {

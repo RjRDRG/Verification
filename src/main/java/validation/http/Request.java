@@ -1,18 +1,16 @@
 package validation.http;
 
-import java.util.Set;
+import java.util.List;
 
 public class Request {
 
-    Set<Parameter> parameters;
-    String mediaType;
+    List<Parameter> parameters;
 
     public Request() {
         this.parameters = null;
-        this.mediaType = null;
     }
 
-    public void setParameters(Set<Parameter> parameters) {
+    public void setParameters(List<Parameter> parameters) {
         this.parameters = parameters;
     }
 }

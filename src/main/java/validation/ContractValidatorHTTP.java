@@ -11,6 +11,7 @@ import validation.result.*;
 
 import java.io.FileNotFoundException;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -80,33 +81,20 @@ public class ContractValidatorHTTP {
         Set<Property> newP = newContract.getRequestProperties(method.newEndpoint);
         Set<Property> oldP = oldContract.getRequestProperties(method.oldEndpoint);
 
-        Set<Parameter> parameters = new HashSet<>();
-        Set<Field> fields = new HashSet<>();
+        List<Parameter> parameters = new LinkedList<>();
 
         Set<Property> intersection = new HashSet<>(newP);
         intersection.retainAll(oldP);
 
         for (Property p : intersection) {
-            if(p.key.type == PropertyKey.Type.PARAMETER) {
-                Parameter parameter = new Parameter(p.key);
-                if(!p.array) {
-                    parameter.setResolution(Resolution.keyResolution(p.key));
-                }
-                else {
-                    parameter.setSuggestions(List.of(Resolution.keyResolution(p.key)));
-                }
-                parameters.add(parameter);
+            Parameter parameter = new Parameter(p.key);
+            if(!p.array) {
+                parameter.setResolution(Resolution.keyResolution(p.key));
             }
-            else if(p.key.type == PropertyKey.Type.BODY) {
-                Field field = new Field(p.key);
-                if(!p.array) {
-                    field.setResolution(Resolution.keyResolution(p.key));
-                }
-                else {
-                    field.setSuggestions(List.of(Resolution.keyResolution(p.key)));
-                }
-                fields.add(field);
+            else {
+                parameter.setSuggestions(List.of(Resolution.keyResolution(p.key)));
             }
+            parameters.add(parameter);
         }
 
         Set<Property> unmapped = new HashSet<>(newP);
@@ -118,18 +106,11 @@ public class ContractValidatorHTTP {
         for(Property p : unmapped) {
             List<Resolution> suggestions = resolutionBuilder.solve(p, unused);
 
-            if(p.key.type == PropertyKey.Type.PARAMETER) {
-                Parameter parameter = new Parameter(p.key);
-                parameter.setSuggestions(suggestions);
+            Parameter parameter = new Parameter(p.key);
+            parameter.setSuggestions(suggestions);
 
-                parameters.add(parameter);
-            }
-            else if(p.key.type == PropertyKey.Type.BODY) {
-
-            }
+            parameters.add(parameter);
         }
-
-        //newContract.getPropertySuccessors(method.key, new PropertyKey(PropertyKey.Type.BODY, location, Collections.emptyList(), null));
 
         request.setParameters(parameters);
     }
@@ -137,6 +118,44 @@ public class ContractValidatorHTTP {
     // RESPONSE --------------------------------------------------------------------------------------------------------
 
     private void processResponse(Method method) {
+        List<Response> responses = method.responses;
+
+        Set<Property> newP = newContract.getRequestProperties(method.newEndpoint);
+        Set<Property> oldP = oldContract.getRequestProperties(method.oldEndpoint);
+
+        List<Parameter> parameters = new LinkedList<>();
+
+        Set<Property> intersection = new HashSet<>(newP);
+        intersection.retainAll(oldP);
+
+        for (Property p : intersection) {
+            Parameter parameter = new Parameter(p.key);
+            if(!p.array) {
+                parameter.setResolution(Resolution.keyResolution(p.key));
+            }
+            else {
+                parameter.setSuggestions(List.of(Resolution.keyResolution(p.key)));
+            }
+            parameters.add(parameter);
+        }
+
+        Set<Property> unmapped = new HashSet<>(newP);
+        unmapped.removeAll(intersection);
+
+        Set<Property> unused = new HashSet<>(oldP);
+        unused.removeAll(intersection);
+
+        for(Property p : unmapped) {
+            List<Resolution> suggestions = resolutionBuilder.solve(p, unused);
+
+            Parameter parameter = new Parameter(p.key);
+            parameter.setSuggestions(suggestions);
+
+            parameters.add(parameter);
+        }
+
+        request.setParameters(parameters);
+
 
     }
 

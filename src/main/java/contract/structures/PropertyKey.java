@@ -4,13 +4,14 @@ import java.util.*;
 
 public class PropertyKey {
     public enum Type {PARAMETER, BODY}
+    public enum Location {HEADER, PATH, QUERY, COOKIE, JSON}
 
     public final Type type;
-    public final String location;
+    public final Location location;
     public final List<String> precursors;
     public final String name;
 
-    public PropertyKey(Type type, String location, List<String> precursors, String name) {
+    public PropertyKey(Type type, Location location, List<String> precursors, String name) {
         this.type = type;
         this.location = location;
         this.precursors = precursors;
@@ -22,16 +23,16 @@ public class PropertyKey {
         List<String> p = new LinkedList<>(precursors);
         p.add(name);
         return type.name().toLowerCase() + "-"
-                + location + ":"
+                + location.name().toLowerCase() + ":"
                 + String.join(".", p);
     }
 
     public PropertyKey fromString(String s0) {
         String[] s1 = s0.split("-");
-        Type type = s1[0].equals(Type.PARAMETER.name().toLowerCase()) ? Type.PARAMETER : Type.BODY;
+        Type type = Type.valueOf(s1[0].toUpperCase());
 
         String[] s2 = s1[1].split(":");
-        String location = s2[0];
+        Location location = Location.valueOf(s2[0].toUpperCase());
 
         String[] s3 = s2[1].split(".");
         String name = s3[s3.length-1];

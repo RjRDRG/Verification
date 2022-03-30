@@ -12,7 +12,7 @@ public class Property {
     public final boolean required;
     public final String defaultValue;
 
-    public Property(PropertyKey.Type type, String location, List<String> precursors, String name, boolean array, String primitive, String format, boolean required, String defaultValue) {
+    public Property(PropertyKey.Type type, PropertyKey.Location location, List<String> precursors, String name, boolean array, String primitive, String format, boolean required, String defaultValue) {
         this.key = new PropertyKey(type, location, precursors, name);
         this.array = array;
         this.primitive = primitive;

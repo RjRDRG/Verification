@@ -9,8 +9,10 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class HTTPContractOpenAPI implements IHTTPContract {
 
@@ -39,13 +41,31 @@ public class HTTPContractOpenAPI implements IHTTPContract {
     }
 
     @Override
-    public Set<Property> getResponseProperties(Endpoint endpoint) {
-        return null;
+    public List<String> getResponses(Endpoint endpoint) {
+        Operation operation = extractOperation(endpoint);
+        return new ArrayList<>(operation.getResponses().keySet());
     }
 
     @Override
-    public List<String> getPropertySuccessors(Endpoint endpoint, PropertyKey propertyKey) {
-        return null;
+    public Set<Property> getResponseProperties(Endpoint endpoint, String responseStatus) {
+        Operation operation = extractOperation(endpoint);
+
+        ApiResponse response = operation.getResponses().get(responseStatus);
+
+        Map.Entry<String, MediaType> entry = operation.getResponses().get(responseStatus).getContent().entrySet().stream().findFirst().orElse(null);
+
+        Set<Property> propertySet = new HashSet<>();
+
+        if(entry != null) {
+            String mediaType = entry.getKey();
+            Schema schema = entry.getValue().getSchema();
+
+            if(mediaType.equals("application/json")) {
+                addPropertiesFromJsonSchema(propertySet, new LinkedList<>(), schema, operation.getRequestBody().getRequired());
+            }
+        }
+
+        return propertySet;
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -79,10 +99,10 @@ public class HTTPContractOpenAPI implements IHTTPContract {
         return keys;
     }
 
-    private Operation extractOperation(Endpoint key) {
-        PathItem path = api.getPaths().get(key.path);
+    private Operation extractOperation(Endpoint endpoint) {
+        PathItem path = api.getPaths().get(endpoint.path);
         Operation operation;
-        switch (key.method) {
+        switch (endpoint.method) {
             case GET:
                 operation = path.getGet();
                 break;
@@ -108,7 +128,7 @@ public class HTTPContractOpenAPI implements IHTTPContract {
                 operation = path.getOptions();
                 break;
             default:
-                throw new IllegalStateException("Unexpected value: " + key.method);
+                throw new IllegalStateException("Unexpected value: " + endpoint.method);
         }
         return operation;
     }
@@ -122,7 +142,7 @@ public class HTTPContractOpenAPI implements IHTTPContract {
             propertySet.add(
                 new Property(
                         PropertyKey.Type.PARAMETER,
-                        p.getIn(),
+                        PropertyKey.Location.valueOf(p.getIn()),
                         Collections.emptyList(),
                         p.getName(),
                         false,
@@ -149,27 +169,27 @@ public class HTTPContractOpenAPI implements IHTTPContract {
             Schema schema = entry.getValue().getSchema();
 
             if(mediaType.equals("application/json")) {
-                addPropertiesFromJsonSchema(propertySet, mediaType, new LinkedList<>(), schema, operation.getRequestBody().getRequired());
+                addPropertiesFromJsonSchema(propertySet, new LinkedList<>(), schema, operation.getRequestBody().getRequired());
             }
         }
 
         return propertySet;
     }
 
-    private void addPropertiesFromJsonSchema(Set<Property> propertySet, String mediaType, List<String> precursors, Schema schema, boolean required) {
+    private void addPropertiesFromJsonSchema(Set<Property> propertySet, List<String> precursors, Schema schema, boolean required) {
         if(schema.getType().equals("object")) {
             Map<String, Schema> schemaProperties = schema.getProperties();
             for (Map.Entry<String, Schema> entry : schemaProperties.entrySet()) {
                 List<String> newPrecursors = new LinkedList<>(precursors);
                 precursors.add(entry.getKey());
-                addPropertiesFromJsonSchema(propertySet, mediaType, newPrecursors, entry.getValue(), schema.getRequired().contains(entry.getKey()));
+                addPropertiesFromJsonSchema(propertySet, newPrecursors, entry.getValue(), schema.getRequired().contains(entry.getKey()));
             }
         }
         else if(schema.getType().matches("integer|string|number|boolean")) {
             propertySet.add(
                     new Property(
                             PropertyKey.Type.BODY,
-                            mediaType,
+                            PropertyKey.Location.JSON,
                             precursors,
                             schema.getName(),
                             false,
@@ -184,7 +204,7 @@ public class HTTPContractOpenAPI implements IHTTPContract {
             propertySet.add(
                     new Property(
                             PropertyKey.Type.BODY,
-                            mediaType,
+                            PropertyKey.Location.JSON,
                             precursors,
                             schema.getName(),
                             true,
