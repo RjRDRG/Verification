@@ -2,7 +2,6 @@ package contract;
 
 import contract.structures.Endpoint;
 import contract.structures.Property;
-import contract.structures.PropertyKey;
 
 import java.util.List;
 import java.util.Set;

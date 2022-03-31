@@ -142,7 +142,7 @@ public class HTTPContractOpenAPI implements IHTTPContract {
             propertySet.add(
                 new Property(
                         PropertyKey.Type.PARAMETER,
-                        PropertyKey.Location.valueOf(p.getIn()),
+                        PropertyKey.Location.valueOf(p.getIn().toUpperCase()),
                         Collections.emptyList(),
                         p.getName(),
                         false,

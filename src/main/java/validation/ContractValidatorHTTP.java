@@ -53,21 +53,17 @@ public class ContractValidatorHTTP {
         Set<Endpoint> oldEndpoints = oldContract.getEndpoints();
 
         boolean missingEndpoints = false;
-        for (Endpoint key: newEndpoints) {
-            if(oldEndpoints.contains(key)) {
-                result.addEndpoint(new Method(key, key));
+        for (Endpoint endpoint: newEndpoints) {
+            if(oldEndpoints.contains(endpoint)) {
+                result.addEndpoint(new Method(endpoint, endpoint));
             }
             else {
                 missingEndpoints = true;
-                result.addEndpoint(new Method(key, new Endpoint("MISSING", MISSING)));
+                result.addEndpoint(new Method(endpoint, new Endpoint("MISSING", MISSING)));
             }
         }
 
-        if(!missingEndpoints) {
-            result.setSoundness(Result.Soundness.COMPATIBLE);
-        }
-        else {
-            result.setSoundness(Result.Soundness.UNKNOWN);
+        if(missingEndpoints) {
             ResultIO.requestIntervention(result);
         }
     }

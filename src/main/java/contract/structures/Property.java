@@ -33,4 +33,16 @@ public class Property {
     public int hashCode() {
         return Objects.hash(key, array, primitive, format);
     }
+
+    @Override
+    public String toString() {
+        return "Property{" +
+                "key=" + key +
+                ", array=" + array +
+                ", primitive='" + primitive + '\'' +
+                ", format='" + format + '\'' +
+                ", required=" + required +
+                ", defaultValue='" + defaultValue + '\'' +
+                '}';
+    }
 }

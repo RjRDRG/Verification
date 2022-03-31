@@ -18,11 +18,20 @@ public class Endpoint {
         if (this == o) return true;
         if (!(o instanceof Endpoint)) return false;
         Endpoint that = (Endpoint) o;
-        return path.equals(that.path) && method == that.method;
+        return cleanPath().equals(that.cleanPath()) && method == that.method;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(path, method);
+        return Objects.hash(cleanPath(), method);
+    }
+
+    public String cleanPath() {
+        return path.replaceAll("\\{.*?\\}", "VAR");
+    }
+
+    @Override
+    public String toString() {
+        return "Endpoint{" + cleanPath() + " " + method + '}';
     }
 }
