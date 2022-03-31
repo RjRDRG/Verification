@@ -32,6 +32,6 @@ public class Endpoint {
 
     @Override
     public String toString() {
-        return "Endpoint{" + cleanPath() + " " + method + '}';
+        return path + " " + method;
     }
 }

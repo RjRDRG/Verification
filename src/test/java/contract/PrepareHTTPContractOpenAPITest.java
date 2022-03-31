@@ -14,21 +14,28 @@ public class PrepareHTTPContractOpenAPITest {
         Files.writeString(
                 Paths.get(HTTPContractOpenAPITest.basePath + "getEndpoints.txt"),
                 getEndpoints,
-                StandardOpenOption.TRUNCATE_EXISTING
+                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING
         );
 
         String getRequestProperties = HTTPContractOpenAPITest.getRequestProperties();
         Files.writeString(
                 Paths.get(HTTPContractOpenAPITest.basePath + "getRequestProperties.txt"),
                 getRequestProperties,
-                StandardOpenOption.TRUNCATE_EXISTING
+                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING
         );
 
         String getResponses = HTTPContractOpenAPITest.getResponses();
         Files.writeString(
                 Paths.get(HTTPContractOpenAPITest.basePath + "getResponses.txt"),
                 getResponses,
-                StandardOpenOption.TRUNCATE_EXISTING
+                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING
+        );
+
+        String getResponseProperties = HTTPContractOpenAPITest.getResponseProperties();
+        Files.writeString(
+                Paths.get(HTTPContractOpenAPITest.basePath + "getResponseProperties.txt"),
+                getResponseProperties,
+                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING
         );
     }
 

@@ -52,16 +52,17 @@ public class HTTPContractOpenAPI implements IHTTPContract {
 
         ApiResponse response = operation.getResponses().get(responseStatus);
 
-        Map.Entry<String, MediaType> entry = operation.getResponses().get(responseStatus).getContent().entrySet().stream().findFirst().orElse(null);
+        Optional<Map.Entry<String, MediaType>> entry = Optional.ofNullable(response.getContent())
+                .flatMap(r -> r.entrySet().stream().findFirst());
 
         Set<Property> propertySet = new HashSet<>();
 
-        if(entry != null) {
-            String mediaType = entry.getKey();
-            Schema schema = entry.getValue().getSchema();
+        if(entry.isPresent()) {
+            String mediaType = entry.get().getKey();
+            Schema schema = entry.get().getValue().getSchema();
 
             if(mediaType.equals("application/json")) {
-                addPropertiesFromJsonSchema(propertySet, new LinkedList<>(), schema, operation.getRequestBody().getRequired());
+                addPropertiesFromJsonSchema(propertySet, new LinkedList<>(), schema, true);
             }
         }
 
@@ -138,7 +139,7 @@ public class HTTPContractOpenAPI implements IHTTPContract {
 
         Set<Property> propertySet = new HashSet<>();
 
-        for(Parameter p : operation.getParameters()) {
+        for(Parameter p : Optional.ofNullable(operation.getParameters()).orElse(Collections.emptyList())) {
             propertySet.add(
                 new Property(
                         PropertyKey.Type.PARAMETER,
@@ -160,13 +161,19 @@ public class HTTPContractOpenAPI implements IHTTPContract {
     public Set<Property> getRequestBodyProperties(Endpoint key) {
         Operation operation = extractOperation(key);
 
-        Map.Entry<String, MediaType> entry = operation.getRequestBody().getContent().entrySet().stream().findFirst().orElse(null);
+        Optional<Map.Entry<String, MediaType>> entry = Optional.ofNullable(operation.getRequestBody())
+            .flatMap(r -> r
+                .getContent()
+                .entrySet()
+                .stream()
+                .findFirst()
+            );
 
         Set<Property> propertySet = new HashSet<>();
 
-        if(entry != null) {
-            String mediaType = entry.getKey();
-            Schema schema = entry.getValue().getSchema();
+        if(entry.isPresent()) {
+            String mediaType = entry.get().getKey();
+            Schema schema = entry.get().getValue().getSchema();
 
             if(mediaType.equals("application/json")) {
                 addPropertiesFromJsonSchema(propertySet, new LinkedList<>(), schema, operation.getRequestBody().getRequired());
