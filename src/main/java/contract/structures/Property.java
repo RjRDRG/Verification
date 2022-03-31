@@ -26,7 +26,7 @@ public class Property {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Property property = (Property) o;
-        return array == property.array && key.equals(property.key) && primitive.equals(property.primitive) && format.equals(property.format);
+        return array == property.array && key.equals(property.key) && primitive.equals(property.primitive) && Objects.equals(format, property.format);
     }
 
     @Override
@@ -36,13 +36,9 @@ public class Property {
 
     @Override
     public String toString() {
-        return "Property{" +
-                "key=" + key +
-                ", array=" + array +
-                ", primitive='" + primitive + '\'' +
-                ", format='" + format + '\'' +
-                ", required=" + required +
-                ", defaultValue='" + defaultValue + '\'' +
-                '}';
+        return String.format(
+                "%-40s %-20s %-20s %-20s %-20s %-20s",
+                "key: " + key, "isArray: " + array, "primitive: " + primitive, "format: " + format, "required: " + required, "default: " + defaultValue
+        );
     }
 }

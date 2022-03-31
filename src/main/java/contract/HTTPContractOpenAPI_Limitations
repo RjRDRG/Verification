@@ -1,3 +1,11 @@
+Used
+    <groupId>io.swagger.parser.v3</groupId>
+    <artifactId>swagger-parser</artifactId>
+    <version>2.0.31</version>
+    <artifactId>swagger-parser-core</artifactId>
+    <version>2.0.31</version>
+
+
 Unsupported
  Only supports one media type for requestBody's and responses
  Dictionary's are not supported in schemas,  doesn't support collections in schemas
@@ -10,6 +18,7 @@ Unsupported
  Doesn't use the body to fill parameters values
  Doesn't support response status migration yet
  Doesn't support enums yet
+ Doesn't support headers in responses
 
 Features
  Supports renaming fields and parameters

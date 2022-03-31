@@ -62,7 +62,7 @@ public class HTTPContractOpenAPI implements IHTTPContract {
             Schema schema = entry.get().getValue().getSchema();
 
             if(mediaType.equals("application/json")) {
-                addPropertiesFromJsonSchema(propertySet, new LinkedList<>(), schema, true);
+                addPropertiesFromJsonSchema(propertySet, new LinkedList<>(), null, schema, true);
             }
         }
 
@@ -176,20 +176,21 @@ public class HTTPContractOpenAPI implements IHTTPContract {
             Schema schema = entry.get().getValue().getSchema();
 
             if(mediaType.equals("application/json")) {
-                addPropertiesFromJsonSchema(propertySet, new LinkedList<>(), schema, operation.getRequestBody().getRequired());
+                addPropertiesFromJsonSchema(propertySet, new LinkedList<>(), null, schema, operation.getRequestBody().getRequired());
             }
         }
 
         return propertySet;
     }
 
-    private void addPropertiesFromJsonSchema(Set<Property> propertySet, List<String> precursors, Schema schema, boolean required) {
+    private void addPropertiesFromJsonSchema(Set<Property> propertySet, List<String> precursors, String propertyName, Schema schema, boolean required) {
         if(schema.getType().equals("object")) {
             Map<String, Schema> schemaProperties = schema.getProperties();
             for (Map.Entry<String, Schema> entry : schemaProperties.entrySet()) {
                 List<String> newPrecursors = new LinkedList<>(precursors);
-                precursors.add(entry.getKey());
-                addPropertiesFromJsonSchema(propertySet, newPrecursors, entry.getValue(), schema.getRequired().contains(entry.getKey()));
+                if(propertyName != null)
+                    precursors.add(propertyName);
+                addPropertiesFromJsonSchema(propertySet, newPrecursors, entry.getKey(), entry.getValue(), schema.getRequired().contains(entry.getKey()));
             }
         }
         else if(schema.getType().matches("integer|string|number|boolean")) {
@@ -198,7 +199,7 @@ public class HTTPContractOpenAPI implements IHTTPContract {
                             PropertyKey.Type.BODY,
                             PropertyKey.Location.JSON,
                             precursors,
-                            schema.getName(),
+                            propertyName,
                             false,
                             schema.getType(),
                             schema.getFormat(),
@@ -213,7 +214,7 @@ public class HTTPContractOpenAPI implements IHTTPContract {
                             PropertyKey.Type.BODY,
                             PropertyKey.Location.JSON,
                             precursors,
-                            schema.getName(),
+                            propertyName,
                             true,
                             "UNKNOWN", //TODO. see where array item schema is stored in Schema class? properties? additional properties? it should have a field called items.
                             "UNKNOWN",
