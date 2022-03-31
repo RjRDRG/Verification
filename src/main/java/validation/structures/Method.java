@@ -1,8 +1,7 @@
-package validation.http;
+package validation.structures;
 
 import contract.structures.Endpoint;
 
-import java.util.LinkedList;
 import java.util.List;
 
 public class Method {
@@ -16,9 +15,13 @@ public class Method {
     public Method(Endpoint newEndpoint, Endpoint oldEndpoint) {
         this.newEndpoint = newEndpoint;
         this.oldEndpoint = oldEndpoint;
-        this.request = new Request();
-        this.responses = new LinkedList<>();
     }
 
+    public void setRequest(Request request) {
+        this.request = request;
+    }
 
+    public void setResponses(List<Response> responses) {
+        this.responses = responses;
+    }
 }

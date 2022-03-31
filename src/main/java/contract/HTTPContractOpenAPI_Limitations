@@ -8,6 +8,8 @@ Unsupported
  Parameter type described as content is not supported
  Doesn't support type or format migrations for now (to support format migrations answer set programming is needed)
  Doesn't use the body to fill parameters values
+ Doesn't support response status migration yet
+ Doesn't support enums yet
 
 Features
  Supports renaming fields and parameters

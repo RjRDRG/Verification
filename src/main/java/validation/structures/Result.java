@@ -1,11 +1,10 @@
-package validation.result;
-
-import validation.http.Method;
+package validation.structures;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class Result {
+    public enum Soundness {UNKNOWN, COMPATIBLE, INCOMPATIBLE}
 
     Soundness soundness;
     List<Method> methods;

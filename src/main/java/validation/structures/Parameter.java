@@ -1,7 +1,7 @@
-package validation.http;
+package validation.structures;
 
 import contract.structures.PropertyKey;
-import validation.resolution.Resolution;
+import resolution.structures.Resolution;
 
 import java.util.LinkedList;
 import java.util.List;

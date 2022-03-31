@@ -1,8 +1,9 @@
-package validation.result;
+package validation.utils;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
+import validation.structures.Result;
 
 import java.awt.*;
 import java.io.*;

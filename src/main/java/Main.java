@@ -2,10 +2,10 @@ import contract.HTTPContractOpenAPI;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.ParseOptions;
-import validation.resolution.SimpleResolutionAdviser;
-import validation.result.ResultIO;
+import resolution.SimpleResolutionAdviser;
+import validation.utils.ResultIO;
 import validation.ContractValidatorHTTP;
-import validation.result.Result;
+import validation.structures.Result;
 
 import java.io.*;
 
@@ -17,8 +17,8 @@ public class Main {
         parseOptions.setResolve(true);
         parseOptions.setResolveFully(true);
 
-        OpenAPI oldV = new OpenAPIParser().readLocation("./src/main/resources/old.yml", null, parseOptions).getOpenAPI();
-        OpenAPI newV = new OpenAPIParser().readLocation("./src/main/resources/new.yml", null, parseOptions).getOpenAPI();
+        OpenAPI oldV = new OpenAPIParser().readLocation("./src/main/resources/old.yaml", null, parseOptions).getOpenAPI();
+        OpenAPI newV = new OpenAPIParser().readLocation("./src/main/resources/new.yaml", null, parseOptions).getOpenAPI();
 
         ContractValidatorHTTP validator = new ContractValidatorHTTP(
                 new HTTPContractOpenAPI(oldV),

@@ -1,4 +1,4 @@
-package validation.resolution;
+package resolution.structures;
 
 import contract.structures.PropertyKey;
 
