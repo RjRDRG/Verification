@@ -6,13 +6,13 @@ import contract.structures.PropertyKey;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class HTTPContractOpenAPI implements IHTTPContract {
 
@@ -34,16 +34,57 @@ public class HTTPContractOpenAPI implements IHTTPContract {
     }
 
     @Override
-    public Set<Property> getRequestProperties(Endpoint endpoint) {
-        Set<Property> properties = getRequestParameterProperties(endpoint);
-        properties.addAll(getRequestBodyProperties(endpoint));
-        return properties;
-    }
-
-    @Override
     public List<String> getResponses(Endpoint endpoint) {
         Operation operation = extractOperation(endpoint);
         return new ArrayList<>(operation.getResponses().keySet());
+    }
+
+    @Override
+    public Set<Property> getRequestProperties(Endpoint endpoint) {
+        Operation operation = extractOperation(endpoint);
+
+        Set<Property> propertySet = new HashSet<>();
+
+        for(Parameter p : Optional.ofNullable(operation.getParameters()).orElse(Collections.emptyList())) {
+            addPropertiesFromSchema(
+                    propertySet,
+                    new ExtendedSchema(
+                            p.getSchema(),
+                            PropertyKey.Location.valueOf(p.getIn().toUpperCase()),
+                            Collections.emptyList(),
+                            p.getName(),
+                            p.getRequired()
+                    )
+            );
+        }
+
+        Optional<Map.Entry<String, MediaType>> entry = Optional.ofNullable(operation.getRequestBody())
+                .flatMap(r -> r
+                        .getContent()
+                        .entrySet()
+                        .stream()
+                        .findFirst()
+                );
+
+        if(entry.isPresent()) {
+            String mediaType = entry.get().getKey();
+            Schema schema = entry.get().getValue().getSchema();
+
+            if(mediaType.equals("application/json")) {
+                addPropertiesFromSchema(
+                        propertySet,
+                        new ExtendedSchema(
+                            schema,
+                            PropertyKey.Location.JSON,
+                            Collections.emptyList(),
+                            null,
+                            operation.getRequestBody().getRequired()
+                        )
+                );
+            }
+        }
+
+        return propertySet;
     }
 
     @Override
@@ -52,17 +93,39 @@ public class HTTPContractOpenAPI implements IHTTPContract {
 
         ApiResponse response = operation.getResponses().get(responseStatus);
 
+        Set<Property> propertySet = new HashSet<>();
+
+        for(Map.Entry<String, Header> entry : response.getHeaders().entrySet()) {
+            addPropertiesFromSchema(
+                    propertySet,
+                    new ExtendedSchema(
+                        entry.getValue().getSchema(),
+                        PropertyKey.Location.HEADER,
+                        Collections.emptyList(),
+                        entry.getKey(),
+                        Optional.ofNullable(entry.getValue().getRequired()).orElse(true)
+                    )
+            );
+        }
+
         Optional<Map.Entry<String, MediaType>> entry = Optional.ofNullable(response.getContent())
                 .flatMap(r -> r.entrySet().stream().findFirst());
-
-        Set<Property> propertySet = new HashSet<>();
 
         if(entry.isPresent()) {
             String mediaType = entry.get().getKey();
             Schema schema = entry.get().getValue().getSchema();
 
             if(mediaType.equals("application/json")) {
-                addPropertiesFromJsonSchema(propertySet, new LinkedList<>(), null, schema, true);
+                addPropertiesFromSchema(
+                        propertySet,
+                        new ExtendedSchema(
+                            schema,
+                            PropertyKey.Location.JSON,
+                            Collections.emptyList(),
+                            null,
+                            true
+                        )
+                );
             }
         }
 
@@ -70,6 +133,56 @@ public class HTTPContractOpenAPI implements IHTTPContract {
     }
 
     //------------------------------------------------------------------------------------------------------------------
+
+    private void addPropertiesFromSchema(Set<Property> propertySet, ExtendedSchema es) {
+        if(es.schema.getType().equals("object")) {
+            Map<String, Schema> schemaProperties = es.schema.getProperties();
+            for (Map.Entry<String, Schema> entry : schemaProperties.entrySet()) {
+                List<String> newPrecursors = new LinkedList<>(es.precursors);
+                if(es.name != null)
+                    newPrecursors.add(es.name);
+                addPropertiesFromSchema(
+                        propertySet,
+                        new ExtendedSchema(
+                                entry.getValue(),
+                                es.location,
+                                newPrecursors,
+                                entry.getKey(),
+                                es.schema.getRequired().contains(entry.getKey())
+                        )
+                );
+            }
+        }
+        else if(es.schema.getType().matches("integer|string|number|boolean")) {
+            propertySet.add(
+                    new Property(
+                            es.location,
+                            es.precursors,
+                            es.name,
+                            false,
+                            es.schema.getType(),
+                            es.schema.getFormat(),
+                            es.required,
+                            !es.required ? String.valueOf(es.schema.getDefault()) : null
+                    )
+            );
+        }
+        else if(es.schema.getType().matches("array")) {
+            propertySet.add(
+                    new Property(
+                            es.location,
+                            es.precursors,
+                            es.name,
+                            true,
+                            "UNKNOWN", //TODO. see where array item schema is stored in Schema class? properties? additional properties? it should have a field called items.
+                            "UNKNOWN",
+                            es.required,
+                            !es.required ? String.valueOf(es.schema.getDefault()) : null
+                    )
+            );
+        }
+        // TODO. dictionary type. key is present in schema.type, value type is present in schema.additionalProperties.?
+    }
 
     private Set<Endpoint> extractEndpointsKeys(String path, PathItem item) {
         Set<Endpoint> keys = new HashSet<>();
@@ -134,93 +247,19 @@ public class HTTPContractOpenAPI implements IHTTPContract {
         return operation;
     }
 
-    public Set<Property> getRequestParameterProperties(Endpoint key) {
-        Operation operation = extractOperation(key);
+    static class ExtendedSchema {
+        public final Schema schema;
+        public final PropertyKey.Location location;
+        public final List<String> precursors;
+        public final String name;
+        public final boolean required;
 
-        Set<Property> propertySet = new HashSet<>();
-
-        for(Parameter p : Optional.ofNullable(operation.getParameters()).orElse(Collections.emptyList())) {
-            propertySet.add(
-                new Property(
-                        PropertyKey.Location.valueOf(p.getIn().toUpperCase()),
-                        Collections.emptyList(),
-                        p.getName(),
-                        false,
-                        p.getSchema().getType(),
-                        p.getSchema().getFormat(),
-                        p.getRequired(),
-                        !p.getRequired() ? String.valueOf(p.getSchema().getDefault()) : null
-                )
-            );
+        public ExtendedSchema(Schema schema, PropertyKey.Location location, List<String> precursors, String name, boolean required) {
+            this.schema = schema;
+            this.location = location;
+            this.precursors = precursors;
+            this.name = name;
+            this.required = required;
         }
-
-        return propertySet;
     }
-
-    public Set<Property> getRequestBodyProperties(Endpoint key) {
-        Operation operation = extractOperation(key);
-
-        Optional<Map.Entry<String, MediaType>> entry = Optional.ofNullable(operation.getRequestBody())
-            .flatMap(r -> r
-                .getContent()
-                .entrySet()
-                .stream()
-                .findFirst()
-            );
-
-        Set<Property> propertySet = new HashSet<>();
-
-        if(entry.isPresent()) {
-            String mediaType = entry.get().getKey();
-            Schema schema = entry.get().getValue().getSchema();
-
-            if(mediaType.equals("application/json")) {
-                addPropertiesFromJsonSchema(propertySet, new LinkedList<>(), null, schema, operation.getRequestBody().getRequired());
-            }
-        }
-
-        return propertySet;
-    }
-
-    private void addPropertiesFromJsonSchema(Set<Property> propertySet, List<String> precursors, String propertyName, Schema schema, boolean required) {
-        if(schema.getType().equals("object")) {
-            Map<String, Schema> schemaProperties = schema.getProperties();
-            for (Map.Entry<String, Schema> entry : schemaProperties.entrySet()) {
-                List<String> newPrecursors = new LinkedList<>(precursors);
-                if(propertyName != null)
-                    precursors.add(propertyName);
-                addPropertiesFromJsonSchema(propertySet, newPrecursors, entry.getKey(), entry.getValue(), schema.getRequired().contains(entry.getKey()));
-            }
-        }
-        else if(schema.getType().matches("integer|string|number|boolean")) {
-            propertySet.add(
-                    new Property(
-                            PropertyKey.Location.JSON,
-                            precursors,
-                            propertyName,
-                            false,
-                            schema.getType(),
-                            schema.getFormat(),
-                            required,
-                            !required ? String.valueOf(schema.getDefault()) : null
-                    )
-            );
-        }
-        else if(schema.getType().matches("array")) {
-            propertySet.add(
-                    new Property(
-                            PropertyKey.Location.JSON,
-                            precursors,
-                            propertyName,
-                            true,
-                            "UNKNOWN", //TODO. see where array item schema is stored in Schema class? properties? additional properties? it should have a field called items.
-                            "UNKNOWN",
-                            required,
-                            !required ? String.valueOf(schema.getDefault()) : null
-                    )
-            );
-        }
-        // TODO. dictionary type. key is present in schema.type, value type is present in schema.additionalProperties.?
-    }
-
 }

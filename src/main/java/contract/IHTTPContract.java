@@ -10,9 +10,9 @@ public interface IHTTPContract {
 
     Set<Endpoint> getEndpoints();
 
-    Set<Property> getRequestProperties(Endpoint endpoint);
-
     List<String> getResponses(Endpoint endpoint);
+
+    Set<Property> getRequestProperties(Endpoint endpoint);
 
     Set<Property> getResponseProperties(Endpoint endpoint, String status);
 }

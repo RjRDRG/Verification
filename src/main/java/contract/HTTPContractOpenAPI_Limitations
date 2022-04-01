@@ -11,7 +11,6 @@ Unsupported
  Dictionary's are not supported in schemas,  doesn't support collections in schemas
  Only supports body content of the type application/json
  Doesn't support anyOf, oneOf in schemas
- Only supports primitive types on parameters, doesn't support schema references on parameters
  Refined types are not supported
  Parameter type described as content is not supported
  Doesn't support type or format migrations for now (to support format migrations answer set programming is needed)
