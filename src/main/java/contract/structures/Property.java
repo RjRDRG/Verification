@@ -12,8 +12,8 @@ public class Property {
     public final boolean required;
     public final String defaultValue;
 
-    public Property(PropertyKey.Type type, PropertyKey.Location location, List<String> precursors, String name, boolean array, String primitive, String format, boolean required, String defaultValue) {
-        this.key = new PropertyKey(type, location, precursors, name);
+    public Property(PropertyKey.Location location, List<String> precursors, String name, boolean array, String primitive, String format, boolean required, String defaultValue) {
+        this.key = new PropertyKey(location, precursors, name);
         this.array = array;
         this.primitive = primitive;
         this.format = format;
@@ -37,7 +37,7 @@ public class Property {
     @Override
     public String toString() {
         return String.format(
-                "%-40s %-20s %-20s %-20s %-20s %-20s",
+                "%-30s %-20s %-20s %-20s %-20s %-20s",
                 "key: " + key, "isArray: " + array, "primitive: " + primitive, "format: " + format, "required: " + required, "default: " + defaultValue
         );
     }

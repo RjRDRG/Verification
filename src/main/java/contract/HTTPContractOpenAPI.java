@@ -142,7 +142,6 @@ public class HTTPContractOpenAPI implements IHTTPContract {
         for(Parameter p : Optional.ofNullable(operation.getParameters()).orElse(Collections.emptyList())) {
             propertySet.add(
                 new Property(
-                        PropertyKey.Type.PARAMETER,
                         PropertyKey.Location.valueOf(p.getIn().toUpperCase()),
                         Collections.emptyList(),
                         p.getName(),
@@ -196,7 +195,6 @@ public class HTTPContractOpenAPI implements IHTTPContract {
         else if(schema.getType().matches("integer|string|number|boolean")) {
             propertySet.add(
                     new Property(
-                            PropertyKey.Type.BODY,
                             PropertyKey.Location.JSON,
                             precursors,
                             propertyName,
@@ -211,7 +209,6 @@ public class HTTPContractOpenAPI implements IHTTPContract {
         else if(schema.getType().matches("array")) {
             propertySet.add(
                     new Property(
-                            PropertyKey.Type.BODY,
                             PropertyKey.Location.JSON,
                             precursors,
                             propertyName,

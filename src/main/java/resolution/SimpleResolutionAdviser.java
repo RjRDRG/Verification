@@ -35,12 +35,9 @@ public class SimpleResolutionAdviser implements IResolutionAdviser {
         return result;
     }
 
-    private enum Differences {NAME, LOCATION, TYPE, PRECURSORS}
+    private enum Differences {NAME, LOCATION, PRECURSORS}
     private Set<Differences> getDifferences(PropertyKey k0, PropertyKey k1) {
         Set<Differences> differences = new HashSet<>();
-
-        if(!k1.type.equals(k0.type))
-            differences.add(Differences.TYPE);
 
         if(!k1.location.equals(k0.location))
             differences.add(Differences.LOCATION);
@@ -48,7 +45,7 @@ public class SimpleResolutionAdviser implements IResolutionAdviser {
         if(!k1.precursors.equals(k0.precursors))
             differences.add(Differences.PRECURSORS);
 
-        if(!k1.name.equals(k0.name))
+        if(!Objects.equals(k1.name, k0.name))
             differences.add(Differences.NAME);
 
         return differences;
@@ -63,10 +60,10 @@ public class SimpleResolutionAdviser implements IResolutionAdviser {
             return 1;
         }
         else if(!differences.contains(Differences.NAME)) {  //PARAMETER LOCATION CHANGE
-            return differences.size()+1; //2-4
+            return differences.size()+1; //2-3
         }
         else  //PARAMETER RENAME AND LOCATION CHANGE
-            return differences.size() + Differences.values().length - 1; //5-7
+            return differences.size() + Differences.values().length - 1; //4-5
     }
 
     private int getDifferencesMaxWeight() {
