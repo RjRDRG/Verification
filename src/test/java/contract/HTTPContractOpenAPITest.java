@@ -6,6 +6,7 @@ import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -18,19 +19,19 @@ import java.util.*;
 
 class HTTPContractOpenAPITest {
 
-    static String basePath = "./src/test/resources/HTTPContractOpenAPITest/";
+    static String basePath = "./src/test/resources/contract/";
 
-    static IHTTPContract contract;
+    IHTTPContract contract;
 
-    @BeforeAll
-    static void setup() {
+    @BeforeEach
+    void setUp() {
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);
         parseOptions.setResolveFully(true);
 
         OpenAPI api = new OpenAPIParser().readLocation(basePath + "contract.yaml", null, parseOptions).getOpenAPI();
 
-        contract = new HTTPContractOpenAPI(api);
+        this.contract = new HTTPContractOpenAPI(api);
     }
 
     @Test
@@ -38,7 +39,7 @@ class HTTPContractOpenAPITest {
         assertAgainstFileContent(getEndpoints(), Paths.get(basePath + "getEndpoints.txt"));
     }
 
-    static String getEndpoints() {
+    String getEndpoints() {
         StringBuilder stringBuilder = new StringBuilder();
 
         List<Endpoint> endpoints = new ArrayList<>(contract.getEndpoints());
@@ -55,7 +56,7 @@ class HTTPContractOpenAPITest {
         assertAgainstFileContent(getRequestProperties(), Paths.get(basePath + "getRequestProperties.txt"));
     }
 
-    static String getRequestProperties() {
+    String getRequestProperties() {
         StringBuilder stringBuilder = new StringBuilder();
 
         List<Endpoint> endpoints = new ArrayList<>(contract.getEndpoints());
@@ -81,7 +82,7 @@ class HTTPContractOpenAPITest {
         assertAgainstFileContent(getResponses(), Paths.get(basePath + "getResponses.txt"));
     }
 
-    static String getResponses() {
+    String getResponses() {
         StringBuilder stringBuilder = new StringBuilder();
 
         List<Endpoint> endpoints = new ArrayList<>(contract.getEndpoints());
@@ -107,7 +108,7 @@ class HTTPContractOpenAPITest {
         assertAgainstFileContent(getResponseProperties(), Paths.get(basePath + "getResponseProperties.txt"));
     }
 
-    static String getResponseProperties() {
+    String getResponseProperties() {
         StringBuilder stringBuilder = new StringBuilder();
 
         List<Endpoint> endpoints = new ArrayList<>(contract.getEndpoints());

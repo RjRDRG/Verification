@@ -11,7 +11,7 @@ public class SimpleResolutionAdviser implements IResolutionAdviser {
     @Override
     public List<Resolution> solve(Property np, Set<Property> ops) {
 
-        List<List<Resolution>> suggestions = new ArrayList<>(getDifferencesMaxWeight());
+        List<List<Resolution>> suggestions = new ArrayList<>(getDifferencesMaxWeight()+1);
         for(int i=0; i<getDifferencesMaxWeight()+1; i++) {
             suggestions.add(new LinkedList<>());
         }
@@ -22,7 +22,7 @@ public class SimpleResolutionAdviser implements IResolutionAdviser {
         }
 
         for(Property op : ops) {
-            if(op.primitive.equals(np.primitive) && op.format.equals(np.format)) {
+            if(op.primitive != null && op.primitive.equals(np.primitive) && Objects.equals(op.format, np.format)) {
                 Set<Differences> differences = getDifferences(np.key, op.key);
                 int resolutionWeight = getDifferencesWeight(differences);
 
@@ -35,8 +35,8 @@ public class SimpleResolutionAdviser implements IResolutionAdviser {
         return result;
     }
 
-    private enum Differences {NAME, LOCATION, PRECURSORS}
-    private Set<Differences> getDifferences(PropertyKey k0, PropertyKey k1) {
+    public enum Differences {NAME, LOCATION, PRECURSORS}
+    public Set<Differences> getDifferences(PropertyKey k0, PropertyKey k1) {
         Set<Differences> differences = new HashSet<>();
 
         if(!k1.location.equals(k0.location))
@@ -52,7 +52,7 @@ public class SimpleResolutionAdviser implements IResolutionAdviser {
     }
 
 
-    private int getDifferencesWeight(Set<Differences> differences) {
+    public int getDifferencesWeight(Set<Differences> differences) {
         if(differences.isEmpty()) {
             return 0;
         }
@@ -66,7 +66,7 @@ public class SimpleResolutionAdviser implements IResolutionAdviser {
             return differences.size() + Differences.values().length - 1; //4-5
     }
 
-    private int getDifferencesMaxWeight() {
+    public int getDifferencesMaxWeight() {
         return (2*Differences.values().length) - 1;
     }
 }

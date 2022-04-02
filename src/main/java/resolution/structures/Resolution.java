@@ -3,6 +3,8 @@ package resolution.structures;
 import contract.structures.PropertyKey;
 
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 public class Resolution {
 
@@ -26,10 +28,21 @@ public class Resolution {
 
     public static Resolution defaultValueResolution(String defaultValue) {
         Map<ARG_TYPE, String> args = Map.of(
-                ARG_TYPE.DEFAULT_VALUE, defaultValue
+                ARG_TYPE.DEFAULT_VALUE, Optional.ofNullable(defaultValue).orElse("null")
         );
         return new Resolution(Rule.DEFAULT_VALUE, args);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Resolution that = (Resolution) o;
+        return rule == that.rule && resolutionArgs.equals(that.resolutionArgs);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(rule, resolutionArgs);
+    }
 }

@@ -8,30 +8,32 @@ import java.nio.file.StandardOpenOption;
 public class PrepareHTTPContractOpenAPITest {
 
     public static void main(String[] args) throws IOException { //Generate logs
-        HTTPContractOpenAPITest.setup();
+        HTTPContractOpenAPITest test = new HTTPContractOpenAPITest();
 
-        String getEndpoints = HTTPContractOpenAPITest.getEndpoints();
+        test.setUp();
+
+        String getEndpoints = test.getEndpoints();
         Files.writeString(
                 Paths.get(HTTPContractOpenAPITest.basePath + "getEndpoints.txt"),
                 getEndpoints,
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING
         );
 
-        String getRequestProperties = HTTPContractOpenAPITest.getRequestProperties();
+        String getRequestProperties = test.getRequestProperties();
         Files.writeString(
                 Paths.get(HTTPContractOpenAPITest.basePath + "getRequestProperties.txt"),
                 getRequestProperties,
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING
         );
 
-        String getResponses = HTTPContractOpenAPITest.getResponses();
+        String getResponses = test.getResponses();
         Files.writeString(
                 Paths.get(HTTPContractOpenAPITest.basePath + "getResponses.txt"),
                 getResponses,
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING
         );
 
-        String getResponseProperties = HTTPContractOpenAPITest.getResponseProperties();
+        String getResponseProperties = test.getResponseProperties();
         Files.writeString(
                 Paths.get(HTTPContractOpenAPITest.basePath + "getResponseProperties.txt"),
                 getResponseProperties,

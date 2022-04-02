@@ -125,15 +125,13 @@ paths:
 components:
   schemas:
     Pet:
-      allOf:
-        - $ref: '#/components/schemas/NewPet'
-        - type: object
-          required:
-          - id
-          properties:
-            id:
-              type: integer
-              format: int64
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          format: int64
 
     NewPet:
       type: object
@@ -144,7 +142,36 @@ components:
           type: string
         tag:
           type: string
-
+        specie:
+          $ref: '#/components/schemas/Specie'
+    Specie:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        tag:
+          type: string
+        class:
+          $ref: '#/components/schemas/Classification'
+    Classification:
+      type: object
+      required:
+        - name
+      properties:
+        kingdom:
+          type: string
+        phylum:
+          type: string
+        order:
+          type: string
+        family:
+          type: string
+        genus:
+          type: string
+        species:
+          type: string
     Error:
       type: object
       required:

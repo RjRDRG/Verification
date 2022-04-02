@@ -95,7 +95,7 @@ public class HTTPContractOpenAPI implements IHTTPContract {
 
         Set<Property> propertySet = new HashSet<>();
 
-        for(Map.Entry<String, Header> entry : response.getHeaders().entrySet()) {
+        for(Map.Entry<String, Header> entry : Optional.ofNullable(response.getHeaders()).orElse(Collections.emptyMap()).entrySet()) {
             addPropertiesFromSchema(
                     propertySet,
                     new ExtendedSchema(
@@ -174,8 +174,8 @@ public class HTTPContractOpenAPI implements IHTTPContract {
                             es.precursors,
                             es.name,
                             true,
-                            "UNKNOWN", //TODO. see where array item schema is stored in Schema class? properties? additional properties? it should have a field called items.
-                            "UNKNOWN",
+                            null, //TODO. swagger parser doesn't support items schema in arrays yet v2.0.31.
+                            null,
                             es.required,
                             !es.required ? String.valueOf(es.schema.getDefault()) : null
                     )
