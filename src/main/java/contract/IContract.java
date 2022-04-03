@@ -6,7 +6,7 @@ import contract.structures.Property;
 import java.util.List;
 import java.util.Set;
 
-public interface IHTTPContract {
+public interface IContract {
 
     Set<Endpoint> getEndpoints();
 

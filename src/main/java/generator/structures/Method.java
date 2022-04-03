@@ -1,4 +1,4 @@
-package validation.structures;
+package generator.structures;
 
 import contract.structures.Endpoint;
 

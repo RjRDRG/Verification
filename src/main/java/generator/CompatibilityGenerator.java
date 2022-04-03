@@ -1,12 +1,12 @@
-package validation;
+package generator;
 
 import contract.structures.Endpoint;
-import contract.IHTTPContract;
+import contract.IContract;
 import contract.structures.Property;
 import resolution.IResolutionAdviser;
 import resolution.structures.Resolution;
-import validation.utils.*;
-import validation.structures.*;
+import generator.utils.*;
+import generator.structures.*;
 
 import java.io.FileNotFoundException;
 import java.util.HashSet;
@@ -16,16 +16,16 @@ import java.util.Set;
 
 import static contract.structures.Endpoint.Method.MISSING;
 
-public class ContractValidatorHTTP {
+public class CompatibilityGenerator {
 
-    IHTTPContract oldContract;
-    IHTTPContract newContract;
+    IContract oldContract;
+    IContract newContract;
 
     IResolutionAdviser resolutionBuilder;
 
     Result result;
 
-    public ContractValidatorHTTP(IHTTPContract oldContract, IHTTPContract newContract, IResolutionAdviser resolutionBuilder) {
+    public CompatibilityGenerator(IContract oldContract, IContract newContract, IResolutionAdviser resolutionBuilder) {
         this.oldContract = oldContract;
         this.newContract = newContract;
         this.resolutionBuilder = resolutionBuilder;
@@ -52,25 +52,28 @@ public class ContractValidatorHTTP {
         Set<Endpoint> newEndpoints = newContract.getEndpoints();
         Set<Endpoint> oldEndpoints = oldContract.getEndpoints();
 
-        boolean missingEndpoints = false;
-        for (Endpoint endpoint: newEndpoints) {
-            if(oldEndpoints.contains(endpoint)) {
-                result.addEndpoint(new Method(endpoint, endpoint));
-            }
-            else {
-                missingEndpoints = true;
-                result.addEndpoint(new Method(endpoint, new Endpoint("MISSING", MISSING)));
-            }
+        Set<Endpoint> intersection = new HashSet<>(newEndpoints);
+        intersection.retainAll(oldEndpoints);
+
+        Set<Endpoint> unmapped = new HashSet<>(newEndpoints);
+        unmapped.removeAll(intersection);
+
+        for (Endpoint endpoint: intersection) {
+            result.addEndpoint(new Method(endpoint, endpoint));
         }
 
-        if(missingEndpoints) {
+        for (Endpoint endpoint: unmapped) {
+            result.addEndpoint(new Method(endpoint, new Endpoint("MISSING", MISSING)));
+        }
+
+        if(!unmapped.isEmpty()) {
             ResultIO.requestIntervention(result);
         }
     }
 
     // REQUEST ---------------------------------------------------------------------------------------------------------
 
-    private void processRequest(Method method) {
+    public void processRequest(Method method) {
         Request request = method.request;
 
         Set<Property> newP = newContract.getRequestProperties(method.newEndpoint);
@@ -83,7 +86,7 @@ public class ContractValidatorHTTP {
 
     // RESPONSE --------------------------------------------------------------------------------------------------------
 
-    private void processResponse(Method method) {
+    public void processResponse(Method method) {
         List<Response> responses = new LinkedList<>();
 
         for(String response : newContract.getResponses(method.newEndpoint)) {

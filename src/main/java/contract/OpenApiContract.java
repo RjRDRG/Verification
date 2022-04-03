@@ -14,11 +14,11 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 
 import java.util.*;
 
-public class HTTPContractOpenAPI implements IHTTPContract {
+public class OpenApiContract implements IContract {
 
     OpenAPI api;
 
-    public HTTPContractOpenAPI(OpenAPI api) {
+    public OpenApiContract(OpenAPI api) {
         this.api = api;
     }
 

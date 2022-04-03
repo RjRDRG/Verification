@@ -5,7 +5,6 @@ import contract.structures.Property;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.ParseOptions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,14 +13,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.*;
 
-class HTTPContractOpenAPITest {
+class OpenApiContractTest {
 
     static String basePath = "./src/test/resources/contract/";
 
-    IHTTPContract contract;
+    IContract contract;
 
     @BeforeEach
     void setUp() {
@@ -31,7 +29,7 @@ class HTTPContractOpenAPITest {
 
         OpenAPI api = new OpenAPIParser().readLocation(basePath + "contract.yaml", null, parseOptions).getOpenAPI();
 
-        this.contract = new HTTPContractOpenAPI(api);
+        this.contract = new OpenApiContract(api);
     }
 
     @Test
