@@ -2,26 +2,26 @@ package generator.structures;
 
 import contract.structures.Endpoint;
 
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public class Method {
 
-    public final Endpoint newEndpoint;
-    public final Endpoint oldEndpoint;
+    public final Endpoint endpoint;
+    public final Endpoint priorEndpoint;
 
-    public Request request;
-    public List<Response> responses;
+    public Set<Message> messages;
 
-    public Method(Endpoint newEndpoint, Endpoint oldEndpoint) {
-        this.newEndpoint = newEndpoint;
-        this.oldEndpoint = oldEndpoint;
+    public Method(Endpoint endpoint, Endpoint priorEndpoint) {
+        this.endpoint = endpoint;
+        this.priorEndpoint = priorEndpoint;
+        this.messages = new HashSet<>();
     }
 
-    public void setRequest(Request request) {
-        this.request = request;
+    void addMessage(Message message) {
+        messages.add(message);
     }
 
-    public void setResponses(List<Response> responses) {
-        this.responses = responses;
-    }
 }

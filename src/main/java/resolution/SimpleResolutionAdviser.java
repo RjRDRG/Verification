@@ -2,6 +2,7 @@ package resolution;
 
 import contract.structures.Property;
 import contract.structures.PropertyKey;
+import resolution.structures.Difference;
 import resolution.structures.Resolution;
 
 import java.util.*;
@@ -9,64 +10,38 @@ import java.util.*;
 public class SimpleResolutionAdviser implements IResolutionAdviser {
 
     @Override
-    public List<Resolution> solve(Property np, Set<Property> ops) {
+    public Map<Set<Difference>, List<Resolution>> solve(Property np, Set<Property> ops) {
 
-        List<List<Resolution>> suggestions = new ArrayList<>(getDifferencesMaxWeight()+1);
-        for(int i=0; i<getDifferencesMaxWeight()+1; i++) {
-            suggestions.add(new LinkedList<>());
-        }
+        Map<Set<Difference>, List<Resolution>> suggestions = new HashMap<>();
 
         //USE DEFAULT VALUE
         if(!np.required) {
-            suggestions.set(0, List.of(Resolution.defaultValueResolution(np.defaultValue)));
+            suggestions.put(Set.of(Difference.NEW), List.of(Resolution.defaultValueResolution(np.defaultValue)));
         }
 
         for(Property op : ops) {
             if(op.primitive != null && op.primitive.equals(np.primitive) && Objects.equals(op.format, np.format)) {
-                Set<Differences> differences = getDifferences(np.key, op.key);
-                int resolutionWeight = getDifferencesWeight(differences);
-
-                suggestions.get(resolutionWeight).add(Resolution.keyResolution(op.key));
+                Set<Difference> differences = getDifferences(np.key, op.key);
+                suggestions.putIfAbsent(differences, new LinkedList<>());
+                suggestions.get(differences).add(Resolution.linkResolution(op.key));
             }
         }
 
-        List<Resolution> result = new LinkedList<>();
-        suggestions.forEach(result::addAll);
-        return result;
+        return suggestions;
     }
 
-    public enum Differences {NAME, LOCATION, PRECURSORS}
-    public Set<Differences> getDifferences(PropertyKey k0, PropertyKey k1) {
-        Set<Differences> differences = new HashSet<>();
+    public Set<Difference> getDifferences(PropertyKey k0, PropertyKey k1) {
+        Set<Difference> differences = new HashSet<>();
 
         if(!k1.location.equals(k0.location))
-            differences.add(Differences.LOCATION);
+            differences.add(Difference.LOCATION);
 
-        if(!k1.precursors.equals(k0.precursors))
-            differences.add(Differences.PRECURSORS);
+        if(!k1.predecessors.equals(k0.predecessors))
+            differences.add(Difference.PREDECESSOR);
 
         if(!Objects.equals(k1.name, k0.name))
-            differences.add(Differences.NAME);
+            differences.add(Difference.NAME);
 
         return differences;
-    }
-
-
-    public int getDifferencesWeight(Set<Differences> differences) {
-        if(differences.isEmpty()) {
-            return 0;
-        }
-        else if(differences.size() == 1 && differences.contains(Differences.NAME)) { //PARAMETER RENAME
-            return 1;
-        }
-        else if(!differences.contains(Differences.NAME)) {  //PARAMETER LOCATION CHANGE
-            return differences.size()+1; //2-3
-        }
-        else  //PARAMETER RENAME AND LOCATION CHANGE
-            return differences.size() + Differences.values().length - 1; //4-5
-    }
-
-    public int getDifferencesMaxWeight() {
-        return (2*Differences.values().length) - 1;
     }
 }

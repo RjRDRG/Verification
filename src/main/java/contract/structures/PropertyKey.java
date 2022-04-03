@@ -6,18 +6,18 @@ public class PropertyKey {
     public enum Location {HEADER, PATH, QUERY, COOKIE, JSON}
 
     public final Location location;
-    public final List<String> precursors;
+    public final List<String> predecessors;
     public final String name;
 
-    public PropertyKey(Location location, List<String> precursors, String name) {
+    public PropertyKey(Location location, List<String> predecessors, String name) {
         this.location = location;
-        this.precursors = precursors;
+        this.predecessors = predecessors;
         this.name = name;
     }
 
     @Override
     public String toString() {
-        List<String> p = new LinkedList<>(precursors);
+        List<String> p = new LinkedList<>(predecessors);
         if(name!=null)
             p.add(name);
         return location.name().toLowerCase() + "|"
@@ -32,13 +32,13 @@ public class PropertyKey {
             String[] s3 = s2[1].split(".");
             String name = s3[s3.length - 1];
 
-            List<String> precursors;
+            List<String> predecessors;
             if (s3.length == 1) {
-                precursors = Collections.emptyList();
+                predecessors = Collections.emptyList();
             } else {
-                precursors = Arrays.asList(s3).subList(0, s3.length - 2);
+                predecessors = Arrays.asList(s3).subList(0, s3.length - 2);
             }
-            return new PropertyKey(location, precursors, name);
+            return new PropertyKey(location, predecessors, name);
         }
         else {
             return new PropertyKey(location, Collections.emptyList(), null);
@@ -50,11 +50,11 @@ public class PropertyKey {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PropertyKey that = (PropertyKey) o;
-        return location == that.location && precursors.equals(that.precursors) && Objects.equals(name, that.name);
+        return location == that.location && predecessors.equals(that.predecessors) && Objects.equals(name, that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(location, precursors, name);
+        return Objects.hash(location, predecessors, name);
     }
 }

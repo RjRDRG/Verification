@@ -2,35 +2,26 @@ package resolution.structures;
 
 import contract.structures.PropertyKey;
 
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 public class Resolution {
 
     public enum Rule {LINK, DEFAULT_VALUE, FUNCTION}
     public final Rule rule;
 
-    public enum ARG_TYPE {KEY, DEFAULT_VALUE}
-    public final Map<ARG_TYPE, String> resolutionArgs;
+    public final String resolution;
 
-    private Resolution(Rule rule, Map<ARG_TYPE, String> resolutionArgs) {
+    private Resolution(Rule rule, String resolution) {
         this.rule = rule;
-        this.resolutionArgs = resolutionArgs;
+        this.resolution = resolution;
     }
 
-    public static Resolution keyResolution(PropertyKey key) {
-        Map<ARG_TYPE, String> args = Map.of(
-                ARG_TYPE.KEY, key.toString()
-        );
-        return new Resolution(Rule.LINK, args);
+    public static Resolution linkResolution(PropertyKey key) {
+        return new Resolution(Rule.LINK, key.toString());
     }
 
     public static Resolution defaultValueResolution(String defaultValue) {
-        Map<ARG_TYPE, String> args = Map.of(
-                ARG_TYPE.DEFAULT_VALUE, Optional.ofNullable(defaultValue).orElse("null")
-        );
-        return new Resolution(Rule.DEFAULT_VALUE, args);
+        return new Resolution(Rule.DEFAULT_VALUE, defaultValue);
     }
 
     @Override
@@ -38,11 +29,11 @@ public class Resolution {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Resolution that = (Resolution) o;
-        return rule == that.rule && resolutionArgs.equals(that.resolutionArgs);
+        return rule == that.rule && Objects.equals(resolution, that.resolution);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(rule, resolutionArgs);
+        return Objects.hash(rule, resolution);
     }
 }

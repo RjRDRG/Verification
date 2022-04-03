@@ -87,16 +87,16 @@ public class CompatibilityGenerator {
     // RESPONSE --------------------------------------------------------------------------------------------------------
 
     public void processResponse(Method method) {
-        List<Response> responses = new LinkedList<>();
+        List<Message> respons = new LinkedList<>();
 
         for(String response : newContract.getResponses(method.newEndpoint)) {
             Set<Property> newP = newContract.getResponseProperties(method.newEndpoint, response);
             Set<Property> oldP = oldContract.getResponseProperties(method.oldEndpoint, response);
             List<Parameter> parameters = processProperties(newP,oldP);
-            responses.add(new Response(response, response, parameters));
+            respons.add(new Message(response, response, parameters));
         }
 
-        method.setResponses(responses);
+        method.setResponses(respons);
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -111,10 +111,10 @@ public class CompatibilityGenerator {
         for (Property p : intersection) {
             Parameter parameter = new Parameter(p.key);
             if(!p.array) {
-                parameter.setResolution(Resolution.keyResolution(p.key));
+                parameter.setResolution(Resolution.linkResolution(p.key));
             }
             else {
-                parameter.setSuggestions(List.of(Resolution.keyResolution(p.key)));
+                parameter.setSuggestions(List.of(Resolution.linkResolution(p.key)));
             }
             parameters.add(parameter);
         }

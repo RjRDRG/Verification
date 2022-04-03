@@ -7,7 +7,7 @@ Used
 
 
 Unsupported
- Only supports one media type for requestBody's and responses
+ Only supports one media type for requestBody's and respons
  Dictionary's are not supported in schemas,  doesn't support collections in schemas
  Only supports body content of the type application/json
  Doesn't support anyOf, oneOf in schemas
@@ -17,7 +17,7 @@ Unsupported
  Doesn't use the body to fill parameters values
  Doesn't support response status migration yet
  Doesn't support enums yet
- Doesn't support headers in responses
+ Doesn't support headers in respons
 
 Features
  Supports renaming fields and parameters

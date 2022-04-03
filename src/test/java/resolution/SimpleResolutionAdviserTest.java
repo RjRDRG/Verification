@@ -2,15 +2,13 @@ package resolution;
 
 import contract.structures.Property;
 import contract.structures.PropertyKey;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import resolution.structures.Difference;
 import resolution.structures.Resolution;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class SimpleResolutionAdviserTest {
 
@@ -80,13 +78,16 @@ class SimpleResolutionAdviserTest {
                 )
         );
 
-        resolutions = adviser.solve(np, new HashSet<>(ops.values()));
+        resolutions = adviser.solve(np, new HashSet<>(ops.values()))
+                .values().stream()
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
 
-        assert resolutions.get(0).equals(Resolution.defaultValueResolution(null));
-        assert resolutions.get(1).equals(Resolution.keyResolution(ops.get(1).key));
-        assert resolutions.get(2).equals(Resolution.keyResolution(ops.get(2).key));
-        assert !resolutions.contains(Resolution.keyResolution(ops.get(3).key));
-        assert !resolutions.contains(Resolution.keyResolution(ops.get(4).key));
+        assert resolutions.contains(Resolution.defaultValueResolution(null));
+        assert resolutions.contains(Resolution.linkResolution(ops.get(1).key));
+        assert resolutions.contains(Resolution.linkResolution(ops.get(2).key));
+        assert !resolutions.contains(Resolution.linkResolution(ops.get(3).key));
+        assert !resolutions.contains(Resolution.linkResolution(ops.get(4).key));
 
         np = new Property(
                 PropertyKey.Location.QUERY,
@@ -121,7 +122,10 @@ class SimpleResolutionAdviserTest {
                 )
         );
 
-        resolutions = adviser.solve(np, new HashSet<>(ops.values()));
+        resolutions = adviser.solve(np, new HashSet<>(ops.values()))
+                .values().stream()
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
 
         assert resolutions.isEmpty();
     }
@@ -129,65 +133,30 @@ class SimpleResolutionAdviserTest {
     @Test
     void testGetDifferences() {
         PropertyKey k0, k1;
-        Set<SimpleResolutionAdviser.Differences> differences;
+        Set<Difference> differences;
 
         k0 = new PropertyKey(PropertyKey.Location.HEADER, Collections.emptyList(),"test0");
         k1 = new PropertyKey(PropertyKey.Location.HEADER, Collections.emptyList(),"test1");
 
         differences = adviser.getDifferences(k0,k1);
-        assert differences.contains(SimpleResolutionAdviser.Differences.NAME) && differences.size()==1;
+        assert differences.contains(Difference.NAME) && differences.size()==1;
 
         k0 = new PropertyKey(PropertyKey.Location.HEADER, Collections.emptyList(),"test");
         k1 = new PropertyKey(PropertyKey.Location.COOKIE, Collections.emptyList(),"test");
 
         differences = adviser.getDifferences(k0,k1);
-        assert differences.contains(SimpleResolutionAdviser.Differences.LOCATION) && differences.size()==1;
+        assert differences.contains(Difference.LOCATION) && differences.size()==1;
 
         k0 = new PropertyKey(PropertyKey.Location.JSON, Collections.emptyList(),"test");
         k1 = new PropertyKey(PropertyKey.Location.JSON, List.of("test0"),"test");
 
         differences = adviser.getDifferences(k0,k1);
-        assert differences.contains(SimpleResolutionAdviser.Differences.PRECURSORS) && differences.size()==1;
+        assert differences.contains(Difference.PREDECESSOR) && differences.size()==1;
 
         k0 = new PropertyKey(PropertyKey.Location.HEADER, Collections.emptyList(),"test1");
         k1 = new PropertyKey(PropertyKey.Location.JSON, List.of("test0"),"test");
 
         differences = adviser.getDifferences(k0,k1);
         assert differences.size()==3;
-    }
-
-    @Test
-    void testGetDifferencesWeight() {
-        PropertyKey k0, k1;
-
-        k0 = new PropertyKey(PropertyKey.Location.HEADER, Collections.emptyList(),"test0");
-        k1 = new PropertyKey(PropertyKey.Location.HEADER, Collections.emptyList(),"test1");
-
-        assert adviser.getDifferencesWeight(adviser.getDifferences(k0,k1))==1;
-
-        k0 = new PropertyKey(PropertyKey.Location.HEADER, Collections.emptyList(),"test");
-        k1 = new PropertyKey(PropertyKey.Location.COOKIE, Collections.emptyList(),"test");
-
-        assert adviser.getDifferencesWeight(adviser.getDifferences(k0,k1))==2;
-
-        k0 = new PropertyKey(PropertyKey.Location.JSON, Collections.emptyList(),"test");
-        k1 = new PropertyKey(PropertyKey.Location.JSON, List.of("test0"),"test");
-
-        assert adviser.getDifferencesWeight(adviser.getDifferences(k0,k1))==2;
-
-        k0 = new PropertyKey(PropertyKey.Location.HEADER, Collections.emptyList(),"test");
-        k1 = new PropertyKey(PropertyKey.Location.JSON, List.of("test0"),"test");
-
-        assert adviser.getDifferencesWeight(adviser.getDifferences(k0,k1))==3;
-
-        k0 = new PropertyKey(PropertyKey.Location.JSON, Collections.emptyList(),"test1");
-        k1 = new PropertyKey(PropertyKey.Location.JSON, List.of("test0"),"test");
-
-        assert adviser.getDifferencesWeight(adviser.getDifferences(k0,k1))==4;
-
-        k0 = new PropertyKey(PropertyKey.Location.HEADER, Collections.emptyList(),"test1");
-        k1 = new PropertyKey(PropertyKey.Location.JSON, List.of("test0"),"test");
-
-        assert adviser.getDifferencesWeight(adviser.getDifferences(k0,k1))==5;
     }
 }
