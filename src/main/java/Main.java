@@ -2,7 +2,6 @@ import contract.OpenApiContract;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.ParseOptions;
-import resolution.SimpleResolutionAdviser;
 import generator.utils.ResultIO;
 import generator.CompatibilityGenerator;
 import generator.structures.Result;
@@ -22,8 +21,7 @@ public class Main {
 
         CompatibilityGenerator validator = new CompatibilityGenerator(
                 new OpenApiContract(oldV),
-                new OpenApiContract(newV),
-                new SimpleResolutionAdviser()
+                new OpenApiContract(newV)
         );
 
         Result result = validator.process();

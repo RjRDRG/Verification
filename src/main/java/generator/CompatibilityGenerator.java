@@ -3,7 +3,8 @@ package generator;
 import contract.structures.Endpoint;
 import contract.IContract;
 import contract.structures.Property;
-import resolution.IResolutionAdviser;
+import resolution.LinkResolutionAdviser;
+import resolution.ValueResolutionAdviser;
 import resolution.structures.Resolution;
 import generator.utils.*;
 import generator.structures.*;
@@ -21,20 +22,23 @@ public class CompatibilityGenerator {
     IContract oldContract;
     IContract newContract;
 
-    IResolutionAdviser resolutionBuilder;
+    ValueResolutionAdviser valueResolutionAdviser;
+    LinkResolutionAdviser linkResolutionAdviser;
 
     Result result;
 
-    public CompatibilityGenerator(IContract oldContract, IContract newContract, IResolutionAdviser resolutionBuilder) {
+    public CompatibilityGenerator(IContract oldContract, IContract newContract) {
         this.oldContract = oldContract;
         this.newContract = newContract;
-        this.resolutionBuilder = resolutionBuilder;
+        this.valueResolutionAdviser = new ValueResolutionAdviser();
+        this.linkResolutionAdviser = new LinkResolutionAdviser();
         this.result = new Result();
     }
 
     public Result process() throws FileNotFoundException {
         processEndpoints();
 
+        /*
         for (Method method : result.getEndpoints()) {
             processRequest(method);
         }
@@ -42,7 +46,7 @@ public class CompatibilityGenerator {
         for (Method method : result.getEndpoints()) {
             processResponse(method);
         }
-
+         */
         return result;
     }
 
@@ -70,6 +74,8 @@ public class CompatibilityGenerator {
             ResultIO.requestIntervention(result);
         }
     }
+
+    /*
 
     // REQUEST ---------------------------------------------------------------------------------------------------------
 
@@ -119,14 +125,8 @@ public class CompatibilityGenerator {
             parameters.add(parameter);
         }
 
-        Set<Property> unmapped = new HashSet<>(newP);
-        unmapped.removeAll(intersection);
-
-        Set<Property> unused = new HashSet<>(oldP);
-        unused.removeAll(intersection);
-
-        for(Property p : unmapped) {
-            List<Resolution> suggestions = resolutionBuilder.solve(p, unused);
+        for(Property p : newP) {
+            List<Resolution> suggestions = resolutionBuilder.solve(p, oldP);
 
             Parameter parameter = new Parameter(p.key);
             parameter.setSuggestions(suggestions);
@@ -135,6 +135,6 @@ public class CompatibilityGenerator {
         }
 
         return parameters;
-    }
+    }*/
 
 }

@@ -2,28 +2,29 @@ package resolution;
 
 import contract.structures.Property;
 import contract.structures.PropertyKey;
-import resolution.structures.Difference;
 import resolution.structures.Resolution;
 
 import java.util.*;
 
-public class SimpleResolutionAdviser implements IResolutionAdviser {
+public class LinkResolutionAdviser {
 
-    @Override
-    public Map<Set<Difference>, List<Resolution>> solve(Property np, Set<Property> ops) {
+    public enum Difference {NAME, LOCATION, PREDECESSOR}
 
-        Map<Set<Difference>, List<Resolution>> suggestions = new HashMap<>();
+    public List<Resolution> solve(Property np, Set<Property> ops) {
 
-        //USE DEFAULT VALUE
-        if(!np.required) {
-            suggestions.put(Set.of(Difference.NEW), List.of(Resolution.defaultValueResolution(np.defaultValue)));
-        }
+        List<Resolution> suggestions = new LinkedList<>();
 
         for(Property op : ops) {
             if(op.primitive != null && op.primitive.equals(np.primitive) && Objects.equals(op.format, np.format)) {
                 Set<Difference> differences = getDifferences(np.key, op.key);
-                suggestions.putIfAbsent(differences, new LinkedList<>());
-                suggestions.get(differences).add(Resolution.linkResolution(op.key));
+
+                ArrayList<String> tags = new ArrayList<>(2);
+                if(differences.contains(Difference.NAME))
+                    tags.add("rename");
+                if(differences.contains(Difference.LOCATION) || differences.contains(Difference.PREDECESSOR))
+                    tags.add("relocation");
+
+                suggestions.add(Resolution.linkResolution(op.key, tags.toArray(new String[0])));
             }
         }
 

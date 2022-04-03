@@ -4,19 +4,18 @@ import contract.structures.Property;
 import contract.structures.PropertyKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import resolution.structures.Difference;
 import resolution.structures.Resolution;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-class SimpleResolutionAdviserTest {
+class LinkResolutionAdviserTest {
 
-    SimpleResolutionAdviser adviser;
+    LinkResolutionAdviser adviser;
 
     @BeforeEach
     void setUp() {
-        this.adviser = new SimpleResolutionAdviser();
+        this.adviser = new LinkResolutionAdviser();
     }
 
     @Test
@@ -78,12 +77,8 @@ class SimpleResolutionAdviserTest {
                 )
         );
 
-        resolutions = adviser.solve(np, new HashSet<>(ops.values()))
-                .values().stream()
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
+        resolutions = adviser.solve(np, new HashSet<>(ops.values()));
 
-        assert resolutions.contains(Resolution.defaultValueResolution(null));
         assert resolutions.contains(Resolution.linkResolution(ops.get(1).key));
         assert resolutions.contains(Resolution.linkResolution(ops.get(2).key));
         assert !resolutions.contains(Resolution.linkResolution(ops.get(3).key));
@@ -122,10 +117,7 @@ class SimpleResolutionAdviserTest {
                 )
         );
 
-        resolutions = adviser.solve(np, new HashSet<>(ops.values()))
-                .values().stream()
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
+        resolutions = adviser.solve(np, new HashSet<>(ops.values()));
 
         assert resolutions.isEmpty();
     }
@@ -133,25 +125,25 @@ class SimpleResolutionAdviserTest {
     @Test
     void testGetDifferences() {
         PropertyKey k0, k1;
-        Set<Difference> differences;
+        Set<LinkResolutionAdviser.Difference> differences;
 
         k0 = new PropertyKey(PropertyKey.Location.HEADER, Collections.emptyList(),"test0");
         k1 = new PropertyKey(PropertyKey.Location.HEADER, Collections.emptyList(),"test1");
 
         differences = adviser.getDifferences(k0,k1);
-        assert differences.contains(Difference.NAME) && differences.size()==1;
+        assert differences.contains(LinkResolutionAdviser.Difference.NAME) && differences.size()==1;
 
         k0 = new PropertyKey(PropertyKey.Location.HEADER, Collections.emptyList(),"test");
         k1 = new PropertyKey(PropertyKey.Location.COOKIE, Collections.emptyList(),"test");
 
         differences = adviser.getDifferences(k0,k1);
-        assert differences.contains(Difference.LOCATION) && differences.size()==1;
+        assert differences.contains(LinkResolutionAdviser.Difference.LOCATION) && differences.size()==1;
 
         k0 = new PropertyKey(PropertyKey.Location.JSON, Collections.emptyList(),"test");
         k1 = new PropertyKey(PropertyKey.Location.JSON, List.of("test0"),"test");
 
         differences = adviser.getDifferences(k0,k1);
-        assert differences.contains(Difference.PREDECESSOR) && differences.size()==1;
+        assert differences.contains(LinkResolutionAdviser.Difference.PREDECESSOR) && differences.size()==1;
 
         k0 = new PropertyKey(PropertyKey.Location.HEADER, Collections.emptyList(),"test1");
         k1 = new PropertyKey(PropertyKey.Location.JSON, List.of("test0"),"test");
