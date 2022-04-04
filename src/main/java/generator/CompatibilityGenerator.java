@@ -15,8 +15,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static contract.structures.Endpoint.Method.MISSING;
-
 public class CompatibilityGenerator {
 
     IContract oldContract;
@@ -62,16 +60,12 @@ public class CompatibilityGenerator {
         Set<Endpoint> unmapped = new HashSet<>(newEndpoints);
         unmapped.removeAll(intersection);
 
-        for (Endpoint endpoint: intersection) {
-            result.addEndpoint(new Method(endpoint, endpoint));
-        }
-
-        for (Endpoint endpoint: unmapped) {
-            result.addEndpoint(new Method(endpoint, new Endpoint("MISSING", MISSING)));
-        }
-
         if(!unmapped.isEmpty()) {
             ResultIO.requestIntervention(result);
+        }
+
+        for (Endpoint endpoint: intersection) {
+            result.addEndpoint(new Method(endpoint, endpoint));
         }
     }
 

@@ -36,7 +36,7 @@ public class ResultIO {
         boolean continueProcess = in.nextLine().equalsIgnoreCase("Y");
 
         if(continueProcess) {
-            result.copyValues(readFromYaml());
+            //result.copyValues(readFromYaml());
         }
         else {
             System.exit(1);

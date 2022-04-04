@@ -9,9 +9,14 @@ import java.awt.*;
 import java.awt.event.*;
 
 class MyFrame extends JFrame implements ActionListener {
+    @Override
+    public void actionPerformed(ActionEvent e) {
 
+    }
+
+    /*
     // Components of the Form
-    private Container c;
+    private Pan c;
     private JLabel title;
     private JLabel name;
     private JTextField tname;
@@ -263,6 +268,6 @@ class Registration {
     public static void main(String[] args) throws Exception
     {
         MyFrame f = new MyFrame();
-    }
+    }*/
 }
 

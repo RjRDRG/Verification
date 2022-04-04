@@ -3,7 +3,7 @@ package contract.structures;
 import java.util.Objects;
 
 public class Endpoint {
-    public enum Method {MISSING, GET, PUT, POST, DELETE, PATCH, OPTIONS, HEAD, TRACE }
+    public enum Method {GET, PUT, POST, DELETE, PATCH, OPTIONS, HEAD, TRACE}
 
     public final String path;
     public final Method method;
@@ -33,5 +33,10 @@ public class Endpoint {
     @Override
     public String toString() {
         return path + " " + method;
+    }
+
+    public static Endpoint fromString(String s) {
+        String[] ss = s.split(" ");
+        return new Endpoint(ss[0],Method.valueOf(ss[1]));
     }
 }
