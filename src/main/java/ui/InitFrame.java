@@ -24,6 +24,9 @@ public class InitFrame extends JFrame {
     private final IContract contract;
     private final IContract priorContract;
 
+    public final JButton submit;
+    public final JButton cancel;
+
     List<MethodBuilder> methodBuilders;
 
     public InitFrame(IContract contract, IContract priorContract) {
@@ -33,6 +36,15 @@ public class InitFrame extends JFrame {
 
         BBucket bBucket = new BBucket(20,20);
 
+        BRow bRow = new BRow(0,5);
+
+        this.submit = new JButton("Submit");
+        this.submit.addActionListener(this::initCompleted);
+        this.cancel = new JButton("Cancel");
+        this.cancel.addActionListener(this::initCanceled);
+
+        bBucket.add(bRow.add(submit).add(cancel).close());
+
         for (Endpoint e : contract.getEndpoints()) {
             MethodBuilder mp = new MethodBuilder(e);
             methodBuilders.add(mp);
@@ -41,16 +53,27 @@ public class InitFrame extends JFrame {
 
         JScrollPane mainPanel = new JScrollPane(bBucket.close());
 
-        JFrame frame = new JFrame();
-        frame.setTitle("Compatibly Generator Init");
-        frame.getContentPane().setLayout(new BorderLayout());
-        frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
-        frame.setPreferredSize(new Dimension(600, 600));
-        frame.pack();
-        frame.setResizable(false);
-        frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        frame.setVisible(true);
+        setTitle("Compatibly Generator Init");
+        getContentPane().setLayout(new BorderLayout());
+        getContentPane().add(mainPanel, BorderLayout.CENTER);
+        setPreferredSize(new Dimension(600, 600));
+        pack();
+        setResizable(false);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setVisible(true);
     }
+
+
+    public void initCompleted(ActionEvent e) {
+        this.setVisible(false);
+        new MainFrame(contract, priorContract, this);
+    }
+
+    public void initCanceled(ActionEvent e) {
+        this.dispose();
+        System.exit(1);
+    }
+
 
     class MethodBuilder {
         public Endpoint endpoint;
