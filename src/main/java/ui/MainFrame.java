@@ -3,6 +3,7 @@ package ui;
 import contract.IContract;
 import contract.OpenApiContract;
 import contract.structures.Endpoint;
+import contract.structures.Property;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.ParseOptions;
@@ -53,6 +54,8 @@ public class MainFrame extends JFrame {
         frame.setVisible(true);
     }
 
+
+
     class MethodBuilder {
         public Endpoint endpoint;
         public JLabel priorEndpoint;
@@ -96,31 +99,54 @@ public class MainFrame extends JFrame {
             panel.setBorder(border);
         }
 
-        private void priorEndpointChanged(ActionEvent e) {
-            List<String> responseStatus = priorContract.getResponses(Endpoint.fromString((String) priorEndpointCombo.getSelectedItem()));
-            for(Map.Entry<String, JComboBox<String>> p : responses.entrySet()) {
-                p.getValue().setModel(new DefaultComboBoxModel<>(responseStatus.toArray(new String[0])));
-                p.getValue().setSelectedItem(p.getKey());
+        class MessageBuilder {
+            public final String message;
+            public final JLabel priorMessage;
+            public List<PropertyBuilder> propertyBuilders;
+
+            private final JPanel panel;
+
+            public JPanel getPanel() {
+                return panel;
             }
-        }
-    }
 
-    class MessageBuilder {
-        public final JLabel message;
-        public final JLabel priorMessage;
-        public List<PropertyBuilder> messageBuilders;
+            public MessageBuilder(String message, String priorMessage) {
+                this.message = message;
 
-        private final JPanel panel;
+                BColumn bColumn = new BColumn(0,5);
 
-        MessageBuilder(String message, String priorMessage) {
-            this.message = message;
-            this.priorMessage = priorMessage;
+                this.priorMessage = new JLabel("prior: " + priorMessage);
+                this.priorMessage.setFont(new Font("Arial", Font.PLAIN, 15))
+                bColumn.add(this.priorMessage);
 
-            this.panel = new JPanel();
-        }
+                Set<Property> prs;
+                if(message.contains("request")) {
+                   prs = contract.getRequestProperties(endpoint);
+                }
+                else {
+                    prs = contract.getResponseProperties(endpoint, message);
+                }
 
-        public JPanel getPanel() {
-            return panel;
+                this.propertyBuilders = new ArrayList<>(prs.size());
+
+                for (Property property : prs) {
+                    MessageBuilder rb = new MessageBuilder(rs.getKey(), rs.getValue());
+                    responseBuilders.add(rb);
+                    bColumn.add(rb.getPanel());
+                }
+
+                for(Pair<String, String> rs : responses) {
+                    MessageBuilder rb = new MessageBuilder(rs.getKey(), rs.getValue());
+                    responseBuilders.add(rb);
+                    bColumn.add(rb.getPanel());
+                }
+
+                panel = bColumn.close();
+
+                TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), endpoint.toString());
+                border.setTitleJustification(TitledBorder.RIGHT);
+                panel.setBorder(border);
+            }
         }
     }
 
