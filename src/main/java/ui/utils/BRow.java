@@ -1,9 +1,9 @@
-package ui;
+package ui.utils;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class BColumn {
+public class BRow {
 
     private final int border;
     private final int spacing;
@@ -12,22 +12,22 @@ public class BColumn {
 
     private JPanel p;
 
-    public BColumn(int border, int spacing) {
+    public BRow(int border, int spacing) {
         this.border = border;
         this.spacing = spacing;
         this.empty = true;
         this.p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.PAGE_AXIS));
-        p.add(Box.createRigidArea(new Dimension(0,border)));
+        p.setLayout(new BoxLayout(p, BoxLayout.LINE_AXIS));
+        p.add(Box.createRigidArea(new Dimension(border,0)));
     }
 
-    public BColumn() {
+    public BRow() {
         this(10,5);
     }
 
-    public BColumn add(JComponent component) {
+    public BRow add(JComponent component) {
         if(!empty)
-            p.add(Box.createRigidArea(new Dimension(0,spacing)));
+            p.add(Box.createRigidArea(new Dimension(spacing,0)));
         else
             empty = false;
 
@@ -37,7 +37,7 @@ public class BColumn {
     }
 
     public JPanel close() {
-        p.add(Box.createRigidArea(new Dimension(0,border)));
+        p.add(Box.createRigidArea(new Dimension(border,0)));
         return p;
     }
 }

@@ -9,31 +9,11 @@ import java.util.Objects;
 
 public class Parameter {
     public final String key;
-
-    Resolution resolution;
-    List<Resolution> suggestions;
+    public final String resolution;
 
     public Parameter(PropertyKey key) {
         this.key = key.toString();
-
         this.resolution = null;
-        suggestions = new LinkedList<>();
-    }
-
-    public Resolution getResolution() {
-        return resolution;
-    }
-
-    public void setResolution(Resolution resolution) {
-        this.resolution = resolution;
-    }
-
-    public List<Resolution> getSuggestions() {
-        return suggestions;
-    }
-
-    public void setSuggestions(List<Resolution> suggestions) {
-        this.suggestions = suggestions;
     }
 
     @Override

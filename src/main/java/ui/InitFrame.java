@@ -15,31 +15,34 @@ import java.util.List;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.ParseOptions;
+import ui.utils.BBucket;
+import ui.utils.BColumn;
+import ui.utils.BRow;
 
-public class MethodFrame extends JFrame {
+public class InitFrame extends JFrame {
 
-    IContract contract;
-    IContract priorContract;
+    private final IContract contract;
+    private final IContract priorContract;
 
-    List<MethodBuilder> methodPanels;
+    List<MethodBuilder> methodBuilders;
 
-    public MethodFrame(IContract contract, IContract priorContract) {
+    public InitFrame(IContract contract, IContract priorContract) {
         this.contract = contract;
         this.priorContract = priorContract;
-        this.methodPanels = new LinkedList<>();
+        this.methodBuilders = new LinkedList<>();
 
         BBucket bBucket = new BBucket(20,20);
 
         for (Endpoint e : contract.getEndpoints()) {
             MethodBuilder mp = new MethodBuilder(e);
-            methodPanels.add(mp);
+            methodBuilders.add(mp);
             bBucket.add(mp.getPanel());
         }
 
         JScrollPane mainPanel = new JScrollPane(bBucket.close());
 
         JFrame frame = new JFrame();
-        frame.setTitle("Contract Methods");
+        frame.setTitle("Compatibly Generator Init");
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
         frame.setPreferredSize(new Dimension(600, 600));
@@ -67,7 +70,7 @@ public class MethodFrame extends JFrame {
 
             String[] priorEndpoints = priorContract.getEndpoints().stream().map(Endpoint::toString).toArray(String[]::new);
             priorEndpointCombo = new JComboBox<>(priorEndpoints);
-            priorEndpointCombo.setSelectedItem(endpoint);
+            priorEndpointCombo.setSelectedItem(endpoint.toString());
             priorEndpointCombo.addActionListener(this::priorEndpointChanged);
 
             bColumn.add(new BRow(5,5).add(priorEndpointCombo).close());
@@ -79,12 +82,16 @@ public class MethodFrame extends JFrame {
 
                 JLabel rl = new JLabel(rs);
                 rl.setFont(new Font("Arial", Font.PLAIN, 15));
-
                 bRow.add(rl);
 
-                JComboBox<String> rc = new JComboBox<>(new String[0]);
-                if(this.priorEndpointCombo.getSelectedItem() != null)
-                    priorEndpointChanged(null);
+                JComboBox<String> rc;
+                if(this.priorEndpointCombo.getSelectedItem() != null) {
+                    rc = new JComboBox<>(priorContract.getResponses(Endpoint.fromString((String) priorEndpointCombo.getSelectedItem())).toArray(new String[0]));
+                    rc.setSelectedItem(rs);
+                }
+                else {
+                    rc = new JComboBox<>(new String[0]);
+                }
                 bRow.add(rc);
 
                 responses.put(rs, rc);
@@ -100,9 +107,9 @@ public class MethodFrame extends JFrame {
         }
 
         private void priorEndpointChanged(ActionEvent e) {
-            String[] responseStatus = priorContract.getResponses(Endpoint.fromString((String) priorEndpointCombo.getSelectedItem())).toArray(new String[0]);
+            List<String> responseStatus = priorContract.getResponses(Endpoint.fromString((String) priorEndpointCombo.getSelectedItem()));
             for(Map.Entry<String, JComboBox<String>> p : responses.entrySet()) {
-                p.getValue().setModel(new DefaultComboBoxModel<>(responseStatus));
+                p.getValue().setModel(new DefaultComboBoxModel<>(responseStatus.toArray(new String[0])));
                 p.getValue().setSelectedItem(p.getKey());
             }
         }
@@ -117,6 +124,6 @@ public class MethodFrame extends JFrame {
         OpenAPI newV = new OpenAPIParser().readLocation("./src/main/resources/new.yaml", null, parseOptions).getOpenAPI();
         OpenAPI oldV = new OpenAPIParser().readLocation("./src/main/resources/old.yaml", null, parseOptions).getOpenAPI();
 
-        new MethodFrame(new OpenApiContract(newV), new OpenApiContract(oldV));
+        new InitFrame(new OpenApiContract(newV), new OpenApiContract(oldV));
     }
 }
