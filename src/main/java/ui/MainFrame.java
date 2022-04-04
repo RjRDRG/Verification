@@ -11,9 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import resolution.LinkResolutionAdviser;
 import resolution.ValueResolutionAdviser;
 import resolution.structures.Resolution;
-import ui.utils.BBucket;
-import ui.utils.BColumn;
-import ui.utils.BRow;
+import ui.utils.*;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -86,7 +84,7 @@ public class MainFrame extends JFrame {
 
     class MethodBuilder {
         public Endpoint endpoint;
-        public JLabel priorEndpoint;
+        public Endpoint priorEndpoint;
         public MessageBuilder requestBuilder;
         public List<MessageBuilder> responseBuilders;
 
@@ -98,16 +96,12 @@ public class MainFrame extends JFrame {
 
         public MethodBuilder(InitFrame.MethodBuilder imb) {
             this.endpoint = imb.endpoint;
+            this.priorEndpoint = Endpoint.fromString((String) Objects.requireNonNull(imb.priorEndpointCombo.getSelectedItem()));
 
-            BColumn bColumn = new BColumn(0,5);
-
-            priorEndpoint = new JLabel("prior: " + (String) imb.priorEndpointCombo.getSelectedItem());
-            priorEndpoint.setFont(new Font("Arial", Font.PLAIN, 15));
-            priorEndpoint.setBorder(BorderFactory.createLineBorder(Color.black));
-            bColumn.add(priorEndpoint);
+            BBucket bBucket = new BBucket(10,5);
 
             requestBuilder = new MessageBuilder("request", "request");
-            bColumn.add(requestBuilder.getPanel());
+            bBucket.add(requestBuilder.getPanel());
 
             List<Pair<String, String>> responses =
                     imb.responses.entrySet().stream().map(e -> Pair.of(e.getKey(),(String)e.getValue().getSelectedItem())).collect(Collectors.toList());
@@ -117,19 +111,20 @@ public class MainFrame extends JFrame {
             for(Pair<String, String> rs : responses) {
                 MessageBuilder rb = new MessageBuilder(rs.getKey(), rs.getValue());
                 responseBuilders.add(rb);
-                bColumn.add(rb.getPanel());
+                bBucket.add(rb.getPanel());
             }
 
-            panel = bColumn.close();
+            panel = bBucket.close();
 
-            TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), endpoint.toString());
-            border.setTitleJustification(TitledBorder.RIGHT);
+            String t = priorEndpoint.toString() + "  to  " + endpoint.toString();
+            TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createRaisedBevelBorder(),t);
+            border.setTitleJustification(TitledBorder.CENTER);
             panel.setBorder(border);
         }
 
         class MessageBuilder {
             public final String message;
-            public final JLabel priorMessage;
+            public final String priorMessage;
             public List<PropertyBuilder> propertyBuilders;
 
             public final Set<Property> properties;
@@ -143,12 +138,9 @@ public class MainFrame extends JFrame {
 
             public MessageBuilder(String message, String priorMessage) {
                 this.message = message;
+                this.priorMessage = priorMessage;
 
-                BColumn bColumn = new BColumn(0,5);
-
-                this.priorMessage = new JLabel("prior: " + priorMessage);
-                this.priorMessage.setFont(new Font("Arial", Font.PLAIN, 15));
-                bColumn.add(this.priorMessage);
+                BBucket bBucket = new BBucket(10,5);
 
                 if(message.contains("request")) {
                     this.properties = contract.getRequestProperties(endpoint);
@@ -161,15 +153,20 @@ public class MainFrame extends JFrame {
 
                 this.propertyBuilders = new ArrayList<>(this.properties.size());
 
+                if(this.properties.isEmpty()) {
+                   bBucket.add(BFill.of(new JLabel("NONE")));
+                }
+
                 for (Property property : this.properties) {
                     PropertyBuilder rb = new PropertyBuilder(property);
                     propertyBuilders.add(rb);
-                    bColumn.add(rb.getPanel());
+                    bBucket.add(rb.getPanel());
                 }
 
-                panel = bColumn.close();
+                panel = bBucket.close();
 
-                TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), message);
+                String t = priorMessage + " to " + message;
+                TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), t);
                 border.setTitleJustification(TitledBorder.RIGHT);
                 panel.setBorder(border);
             }
@@ -188,7 +185,7 @@ public class MainFrame extends JFrame {
                 }
 
                 public PropertyBuilder(Property property) {
-                    BColumn bColumn = new BColumn(0,5);
+                    BBucket bBucket = new BBucket(5,5);
 
                     BRow bRow = new BRow(0, 5);
 
@@ -196,12 +193,12 @@ public class MainFrame extends JFrame {
                     this.custom.addActionListener(this::checkBoxToggled);
                     bRow.add(this.custom);
 
-                    this.resolution = new JTextField("filter");
+                    this.resolution = new JTextField();
                     this.resolution.setFont(new Font("Arial", Font.PLAIN, 15));
                     this.resolution.addActionListener(this::resolutionSet);
                     bRow.add(this.resolution);
 
-                    bColumn.add(bRow.close());
+                    bBucket.add(bRow.close());
 
                     this.suggestions = linkResolutionAdviser.solve(property, priorProperties);
                     suggestions.addAll(valueResolutionAdviser.solve(property));
@@ -209,22 +206,17 @@ public class MainFrame extends JFrame {
                     String[] sgs = suggestions.stream().map(s -> s.resolution).toArray(String[]::new);
                     this.suggestion = new JComboBox<>(sgs);
                     this.suggestion.setSelectedItem(Resolution.LINK + property.key.toString());
-                    bColumn.add(suggestion);
+                    bBucket.add(suggestion);
 
-                    panel = bColumn.close();
+                    panel = bBucket.close();
 
-                    TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), property.key.toString());
-                    border.setTitleJustification(TitledBorder.RIGHT);
+                    TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createLoweredBevelBorder(), property.key.toString());
+                    border.setTitleJustification(TitledBorder.LEFT);
                     panel.setBorder(border);
                 }
 
                 private void checkBoxToggled(ActionEvent e) {
-                    if(!custom.isSelected()) {
-                        this.resolution.setText("filter");
-                    }
-                    else {
-                        this.resolution.setText("rule");
-                    }
+
                 }
 
                 private void resolutionSet(ActionEvent e) {
@@ -232,7 +224,7 @@ public class MainFrame extends JFrame {
                         List<String> filter = Arrays.stream(this.resolution.getText().split(" ")).collect(Collectors.toList());
 
                         String[] sgs = suggestions.stream()
-                                .filter(s -> filter.containsAll(s.tags))
+                                .filter(s -> s.tags.containsAll(filter))
                                 .map(s -> s.resolution)
                                 .toArray(String[]::new);
 

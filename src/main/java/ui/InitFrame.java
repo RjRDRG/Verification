@@ -89,7 +89,7 @@ public class InitFrame extends JFrame {
         public MethodBuilder(Endpoint endpoint) {
             this.endpoint = endpoint;
 
-            BColumn bColumn = new BColumn(0,5);
+            BColumn bColumn = new BColumn(5,5);
 
             String[] priorEndpoints = priorContract.getEndpoints().stream().map(Endpoint::toString).toArray(String[]::new);
             priorEndpointCombo = new JComboBox<>(priorEndpoints);
