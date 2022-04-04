@@ -5,11 +5,27 @@ import java.util.Objects;
 public class Endpoint {
     public enum Method {GET, PUT, POST, DELETE, PATCH, OPTIONS, HEAD, TRACE}
 
-    public final String path;
-    public final Method method;
+    public String path;
+    public Method method;
 
     public Endpoint(String path, Method method) {
         this.path = path;
+        this.method = method;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public Method getMethod() {
+        return method;
+    }
+
+    public void setMethod(Method method) {
         this.method = method;
     }
 
@@ -39,4 +55,6 @@ public class Endpoint {
         String[] ss = s.split(" ");
         return new Endpoint(ss[0],Method.valueOf(ss[1]));
     }
+
+
 }

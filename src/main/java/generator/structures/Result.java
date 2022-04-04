@@ -17,4 +17,12 @@ public class Result {
     public void addEndpoint(Method method) {
         this.methods.add(method);
     }
+
+    public List<Method> getMethods() {
+        return methods;
+    }
+
+    public void setMethods(List<Method> methods) {
+        this.methods = methods;
+    }
 }

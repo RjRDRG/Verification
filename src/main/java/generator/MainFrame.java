@@ -1,23 +1,28 @@
-package ui;
+package generator;
 
 import contract.IContract;
-import contract.OpenApiContract;
 import contract.structures.Endpoint;
 import contract.structures.Property;
-import io.swagger.parser.OpenAPIParser;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.parser.core.models.ParseOptions;
+import contract.structures.PropertyKey;
+import generator.structures.Message;
+import generator.structures.Method;
+import generator.structures.Parameter;
+import generator.structures.Result;
+import generator.utils.ResultIO;
 import org.apache.commons.lang3.tuple.Pair;
 import resolution.LinkResolutionAdviser;
 import resolution.ValueResolutionAdviser;
 import resolution.structures.Resolution;
-import ui.utils.*;
+import generator.ui.BBucket;
+import generator.ui.BFill;
+import generator.ui.BRow;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,7 +38,7 @@ public class MainFrame extends JFrame {
     public final JButton submit;
     public final JButton cancel;
 
-    List<MethodBuilder> methodBuilders;
+    public List<MethodBuilder> methodBuilders;
 
     public MainFrame(IContract contract, IContract priorContract, InitFrame initFrame) {
         this.contract = contract;
@@ -75,6 +80,29 @@ public class MainFrame extends JFrame {
 
     public void initCompleted(ActionEvent e) {
         this.setVisible(false);
+        Result result = new Result();
+
+        for (MethodBuilder mb : methodBuilders) {
+            Method method = new Method(mb.endpoint, mb.priorEndpoint);
+
+            List<Parameter> parameters = new LinkedList<>();
+
+            for (MethodBuilder.MessageBuilder.PropertyBuilder pb : mb.requestBuilder.propertyBuilders) {
+                parameters.add(new Parameter(pb.property.key.toString(), pb.custom.isSelected() ? pb.resolution.getText() : (String) pb.suggestion.getSelectedItem()));
+            }
+
+            method.addMessage(Message.requestMessage(parameters));
+
+            result.addEndpoint(method);
+        }
+
+        try {
+            ResultIO.output(result);
+        } catch (FileNotFoundException fileNotFoundException) {
+            fileNotFoundException.printStackTrace();
+        }
+
+        System.exit(1);
     }
 
     public void initCanceled(ActionEvent e) {
@@ -172,6 +200,8 @@ public class MainFrame extends JFrame {
             }
 
             class PropertyBuilder {
+                public final Property property;
+
                 public final JCheckBox custom;
                 public final JTextField resolution;
                 public final JComboBox<String> suggestion;
@@ -185,6 +215,8 @@ public class MainFrame extends JFrame {
                 }
 
                 public PropertyBuilder(Property property) {
+                    this.property = property;
+
                     BBucket bBucket = new BBucket(5,5);
 
                     BRow bRow = new BRow(0, 5);
@@ -216,15 +248,18 @@ public class MainFrame extends JFrame {
                 }
 
                 private void checkBoxToggled(ActionEvent e) {
-
+                    suggestion.setEnabled(!suggestion.isEnabled());
                 }
 
                 private void resolutionSet(ActionEvent e) {
                     if(!custom.isSelected()) {
-                        List<String> filter = Arrays.stream(this.resolution.getText().split(" ")).collect(Collectors.toList());
+                        List<String> filter = Arrays.stream(this.resolution.getText()
+                                .split(" "))
+                                .filter(s -> s.matches("rename|relocation"))
+                                .collect(Collectors.toList());
 
                         String[] sgs = suggestions.stream()
-                                .filter(s -> s.tags.containsAll(filter))
+                                .filter(s -> filter.isEmpty() || s.tags.containsAll(filter) && s.tags.size() == filter.size())
                                 .map(s -> s.resolution)
                                 .toArray(String[]::new);
 

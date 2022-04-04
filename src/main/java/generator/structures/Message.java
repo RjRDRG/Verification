@@ -4,12 +4,12 @@ import java.util.List;
 
 public class Message {
 
-    public static String REQUEST = "request";
-    public static String RESPONSE = "response";
+    public final static String REQUEST = "request";
+    public final static String RESPONSE = "response";
 
-    public final String type;
-    public final String priorType;
-    public final List<Parameter> parameters;
+    public String type;
+    public String priorType;
+    public List<Parameter> parameters;
 
     private Message(String type, String priorType, List<Parameter> parameters) {
         this.type = type;
@@ -24,5 +24,29 @@ public class Message {
 
     public static Message responseMessage(String status, String priorStatus, List<Parameter> parameters) {
         return new Message(RESPONSE + " " + status, RESPONSE + " " + priorStatus, parameters);
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getPriorType() {
+        return priorType;
+    }
+
+    public void setPriorType(String priorType) {
+        this.priorType = priorType;
+    }
+
+    public List<Parameter> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(List<Parameter> parameters) {
+        this.parameters = parameters;
     }
 }

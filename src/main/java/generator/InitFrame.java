@@ -1,7 +1,6 @@
-package ui;
+package generator;
 
 import contract.IContract;
-import contract.OpenApiContract;
 import contract.structures.Endpoint;
 
 import javax.swing.*;
@@ -12,12 +11,9 @@ import java.awt.event.ActionEvent;
 import java.util.*;
 import java.util.List;
 
-import io.swagger.parser.OpenAPIParser;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.parser.core.models.ParseOptions;
-import ui.utils.BBucket;
-import ui.utils.BColumn;
-import ui.utils.BRow;
+import generator.ui.BBucket;
+import generator.ui.BColumn;
+import generator.ui.BRow;
 
 public class InitFrame extends JFrame {
 
@@ -136,17 +132,5 @@ public class InitFrame extends JFrame {
                 p.getValue().setSelectedItem(p.getKey());
             }
         }
-    }
-
-    public static void main(String[] args)
-    {
-        ParseOptions parseOptions = new ParseOptions();
-        parseOptions.setResolve(true);
-        parseOptions.setResolveFully(true);
-
-        OpenAPI newV = new OpenAPIParser().readLocation("./src/main/resources/new.yaml", null, parseOptions).getOpenAPI();
-        OpenAPI oldV = new OpenAPIParser().readLocation("./src/main/resources/old.yaml", null, parseOptions).getOpenAPI();
-
-        new InitFrame(new OpenApiContract(newV), new OpenApiContract(oldV));
     }
 }
