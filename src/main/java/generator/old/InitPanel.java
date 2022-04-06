@@ -1,4 +1,4 @@
-package generator;
+package generator.old;
 
 import contract.IContract;
 import contract.structures.Endpoint;
@@ -11,11 +11,7 @@ import java.awt.event.ActionEvent;
 import java.util.*;
 import java.util.List;
 
-import generator.ui.BBucket;
-import generator.ui.BColumn;
-import generator.ui.BRow;
-
-public class InitFrame extends JFrame {
+public class InitPanel extends JFrame {
 
     private final IContract contract;
     private final IContract priorContract;
@@ -25,7 +21,7 @@ public class InitFrame extends JFrame {
 
     List<MethodBuilder> methodBuilders;
 
-    public InitFrame(IContract contract, IContract priorContract) {
+    public InitPanel(IContract contract, IContract priorContract) {
         this.contract = contract;
         this.priorContract = priorContract;
         this.methodBuilders = new LinkedList<>();
@@ -62,7 +58,7 @@ public class InitFrame extends JFrame {
 
     public void initCompleted(ActionEvent e) {
         this.setVisible(false);
-        new MainFrame(contract, priorContract, this);
+        new MainPanel(contract, priorContract, this);
     }
 
     public void initCanceled(ActionEvent e) {

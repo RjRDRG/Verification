@@ -1,33 +1,32 @@
-package generator.ui;
+package generator.old;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class BBucket {
+public class BBucket extends JPanel implements BFrame {
 
     private final int border;
     private final int spacing;
 
     private boolean empty;
 
-    private final JPanel r;
     private final JPanel c;
 
     public BBucket(int border, int spacing) {
+        super();
         this.border = border;
         this.spacing = spacing;
         this.empty = true;
 
-        this.r = new JPanel();
-        r.setLayout(new BoxLayout(r, BoxLayout.LINE_AXIS));
-        r.add(Box.createRigidArea(new Dimension(border,0)));
+        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+        add(Box.createRigidArea(new Dimension(border,0)));
 
         this.c = new JPanel();
         c.setLayout(new BoxLayout(c, BoxLayout.PAGE_AXIS));
         c.add(Box.createRigidArea(new Dimension(0,border)));
-        r.add(c);
+        add(c);
 
-        r.add(Box.createRigidArea(new Dimension(border,0)));
+        add(Box.createRigidArea(new Dimension(border,0)));
     }
 
     public BBucket() {
@@ -47,6 +46,6 @@ public class BBucket {
 
     public JPanel close() {
         c.add(Box.createRigidArea(new Dimension(0,border)));
-        return r;
+        return this;
     }
 }
