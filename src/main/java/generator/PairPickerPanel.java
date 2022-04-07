@@ -27,7 +27,7 @@ public class PairPickerPanel extends JPanel {
 
         JLabel la1 = new JLabel(title1);
 
-        gp0.load(1,0, la1).removeScaleY().removeItemBorder().add();
+        gp0.load(1,0, la1).removeScaleY().add();
 
         final JList<String> ls0 = new JList<>();
         DefaultListModel<String> m0 = new DefaultListModel<>();

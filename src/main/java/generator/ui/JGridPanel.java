@@ -30,7 +30,7 @@ public class JGridPanel extends JPanel {
             border = BorderFactory.createLineBorder(Color.black);
             anchor = GridBagConstraints.CENTER;
             weightX = 1;
-            weightY = 0;
+            weightY = 1;
             scaleX = true;
             scaleY = true;
         }
@@ -130,15 +130,22 @@ public class JGridPanel extends JPanel {
        c.gridwidth = item.width;
        c.insets = item.externalPad;
        c.anchor = item.anchor;
-       c.weightx = item.weightX;
-       c.weighty = item.weightY;
 
-       if(item.scaleX && item.scaleY)
-            c.fill = GridBagConstraints.BOTH;
-       else if(item.scaleX)
+       if(item.scaleX && item.scaleY) {
+           c.fill = GridBagConstraints.BOTH;
+           c.weightx = item.weightX;
+           c.weighty = item.weightY;
+       }
+       else if(item.scaleX) {
            c.fill = GridBagConstraints.HORIZONTAL;
-       else if(item.scaleY)
+           c.weightx = item.weightX;
+           c.weighty = 0;
+       }
+       else if(item.scaleY) {
            c.fill = GridBagConstraints.VERTICAL;
+           c.weightx = 0;
+           c.weighty = item.weightY;
+       }
 
        if(item.border != null) {
            item.component.setBorder(item.border);
