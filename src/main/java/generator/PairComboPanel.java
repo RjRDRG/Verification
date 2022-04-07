@@ -10,38 +10,51 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-public class PairComboFrame extends JPanel {
+public class PairComboPanel extends JPanel {
 
     public final JButton submit;
+    public Map<String,JComboBox<String>> pairs;
 
-    public PairComboFrame(String title0, List<String> elementsList0, String title1, List<String> elementsList1) {
+    public PairComboPanel(String title0, List<String> elementsList0, String title1, List<String> elementsList1) {
         setLayout(new BorderLayout());
+
+        pairs = new HashMap<>();
 
         JGridPanel gp0 = new JGridPanel();
 
         JLabel la0 = new JLabel(title0, SwingConstants.CENTER);
         la0.setFont(new Font("Serif", Font.PLAIN, 20));
 
-        gp0.load(0, 0, la0).setItemBorder().removeScaleY().add();
+        gp0.load(0, 0, la0).removeScaleY().add();
 
         JLabel la1 = new JLabel(title1, SwingConstants.CENTER);
         la1.setFont(new Font("Serif", Font.PLAIN, 20));
 
-        gp0.load(1, 0, la1).setItemBorder().removeScaleY().add();
+        gp0.load(1, 0, la1).removeScaleY().add();
+
+        final List<String> elementsList1WithNone = new ArrayList<>(elementsList1.size()+1);
+        elementsList1WithNone.add("none");
+        elementsList1WithNone.addAll(elementsList1);
 
         for (int i = 0; i < elementsList0.size(); i++) {
             JLabel la2 = new JLabel(elementsList0.get(i), SwingConstants.CENTER);
             la2.setFont(new Font("Serif", Font.PLAIN, 20));
 
-            JComboBox<String> c0 = new JComboBox<>(elementsList1.toArray(new String[0]));
+            JComboBox<String> c0 = new JComboBox<>(elementsList1WithNone.toArray(new String[0]));
             ((JLabel)c0.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
             c0.setFont(new Font("Serif", Font.PLAIN, 20));
+            c0.setSelectedItem(elementsList0.get(i));
 
             gp0.load(0, i + 1, la2).setItemBorder(new RoundBorder(Color.black)).add();
             gp0.load(1, i + 1, c0).add();
+
+            pairs.put(elementsList0.get(i),c0);
         }
 
         submit = new JButton("Submit");
@@ -72,7 +85,7 @@ class Test0 extends JFrame {
 
         setNimbusStyle();
 
-        PairComboFrame panel = new PairComboFrame(
+        PairComboPanel panel = new PairComboPanel(
                 "Contract Endpoints: " + "./src/main/resources/new.yaml", newV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toList()),
                 "Prior Contract Endpoints: " + "./src/main/resources/old.yaml", oldV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toList())
         );

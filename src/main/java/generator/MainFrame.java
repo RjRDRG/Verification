@@ -1,57 +1,111 @@
 package generator;
 
+import contract.OpenApiContract;
+import contract.structures.Endpoint;
 import generator.old.ContractViewPanel;
 import generator.old.BBucket;
+import generator.utils.TriConsumer;
+import io.swagger.parser.OpenAPIParser;
+import io.swagger.v3.parser.core.models.ParseOptions;
 
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.*;
+import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
-public class MainFrame extends JFrame {
+class MainFrame extends JFrame {
 
-    public MainFrame() {
+    public static void main(String[] args) {
+        new MainFrame();
+    }
+
+    private MainFrame() {
+        super();
+
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+
+        OpenApiContract oldV = new OpenApiContract(
+                new OpenAPIParser().readLocation("./src/main/resources/old.yaml", null, parseOptions).getOpenAPI());
+        OpenApiContract newV = new OpenApiContract(
+                new OpenAPIParser().readLocation("./src/main/resources/new.yaml", null, parseOptions).getOpenAPI()
+        );
 
         setNimbusStyle();
 
-        JComponent main = new BBucket(20,0).add(getMainComponentSimple()).close();
+        TriConsumer<JList<String>> pair = (ls0,ls1,ls2) -> {
+            if(!(ls0.getSelectedIndex()>=0 && ls1.getSelectedIndex()>=0))
+                return;
 
-        setTitle("Contract Evolution Spec");
+            PairComboPanel pairComboPanel = new PairComboPanel(
+                    "Endpoint Responses", new ArrayList<>(newV.getResponses(Endpoint.fromString(ls0.getSelectedValue()))),
+                    "Prior Endpoint Responses", new ArrayList<>(oldV.getResponses(Endpoint.fromString(ls1.getSelectedValue())))
+            );
+
+            SinglePanelFrame frame = new SinglePanelFrame(pairComboPanel,new Dimension(500,500),30);
+
+            pairComboPanel.submit.addActionListener(e -> {
+                DefaultListModel<String> lm0 = (DefaultListModel<String>) ls0.getModel();
+                DefaultListModel<String> lm1 = (DefaultListModel<String>) ls1.getModel();
+                DefaultListModel<String> lm2 = (DefaultListModel<String>) ls2.getModel();
+
+                lm2.add(lm2.size(), ls0.getSelectedValue() + "  <->  " + ls1.getSelectedValue());
+                if(ls2.getSelectedIndex()<0) ls2.setSelectedIndex(0);
+
+                lm0.remove(ls0.getSelectedIndex());
+                if(!lm0.isEmpty()) ls0.setSelectedIndex(0);
+                lm1.remove(ls1.getSelectedIndex());
+                if(!lm1.isEmpty()) ls1.setSelectedIndex(0);
+
+                frame.setVisible(false);
+                frame.dispose();
+            });
+        };
+
+        TriConsumer<JList<String>> unpair = (ls0,ls1,ls2) -> {
+            DefaultListModel<String> lm0 = (DefaultListModel<String>) ls0.getModel();
+            DefaultListModel<String> lm1 = (DefaultListModel<String>) ls1.getModel();
+            DefaultListModel<String> lm2 = (DefaultListModel<String>) ls2.getModel();
+
+            if(ls2.getSelectedIndex()>=0) {
+                String[] parts = ls2.getSelectedValue().split(" <-> ");
+
+                lm0.add(lm0.size(), parts[0]);
+                if(ls0.getSelectedIndex()<0) ls0.setSelectedIndex(0);
+
+                lm1.add(lm1.size(), parts[1]);
+                if(ls1.getSelectedIndex()<0) ls1.setSelectedIndex(0);
+
+                lm2.remove(ls2.getSelectedIndex());
+                if(!lm2.isEmpty()) ls2.setSelectedIndex(0);
+            }
+        };
+
+        PairPickerPanel panel = new PairPickerPanel(pair, unpair,
+                "Contract Endpoints: " + "./src/main/resources/new.yaml", newV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toList()),
+                "Prior Contract Endpoints: " + "./src/main/resources/old.yaml", oldV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toList()),
+                Collections.emptyList()
+        );
+
+        int borderPad = 30;
+
         getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(main, BorderLayout.CENTER);
-        setExtendedState(JFrame.MAXIMIZED_BOTH); //setPreferredSize(new Dimension(600, 600)); pack();
+        getContentPane().add(Box.createRigidArea(new Dimension(0,borderPad)), BorderLayout.PAGE_START);
+        getContentPane().add(Box.createRigidArea(new Dimension(0,borderPad)), BorderLayout.PAGE_END);
+        getContentPane().add(Box.createRigidArea(new Dimension(borderPad,0)), BorderLayout.LINE_START);
+        getContentPane().add(Box.createRigidArea(new Dimension(borderPad,0)), BorderLayout.LINE_END);
+        getContentPane().add(panel, BorderLayout.CENTER);
+        setSize(new Dimension(1000, 1000));
         setResizable(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setVisible(true);
     }
 
-    private JComponent getMainComponentSimple() {
-        JSplitPane s0 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new ContractViewPanel(), new ContractViewPanel());
-        s0.setOneTouchExpandable(true);
-        s0.setResizeWeight(0.5);
-
-        JSplitPane s1 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new EditorPanel(), new ContractViewPanel());
-        s1.setOneTouchExpandable(true);
-        s1.setResizeWeight(0.2);
-
-        s1.setBorder(BorderFactory.createLineBorder(new Color(63, 65, 70)));
-
-        return s1;
-    }
-
-    private JComponent getMainComponent() {
-        EditorPanel editorPanel = new EditorPanel();
-        JPanel diffPanel = new JPanel();
-
-        JSplitPane s0 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, editorPanel, diffPanel);
-        s0.setOneTouchExpandable(true);
-        s0.setResizeWeight(0.2);
-
-        s0.setBorder(BorderFactory.createLineBorder(new Color(63, 65, 70)));
-
-        return s0;
-    }
-
-    private void setNimbusStyle() {
+    public void setNimbusStyle() {
         try {
             UIManager.setLookAndFeel(new NimbusLookAndFeel());
             UIManager.put("control", new Color(128, 128, 128));
@@ -73,9 +127,4 @@ public class MainFrame extends JFrame {
             System.err.println("Nimbus: Unsupported Look and feel!");
         }
     }
-
-    public static void main(String[] args) {
-        new MainFrame();
-    }
 }
-
