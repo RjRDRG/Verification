@@ -7,7 +7,7 @@ import java.awt.*;
 public class JGridPanel extends JPanel {
 
     private static class Item {
-        Component[] components;
+        JComponent component;
         int column;
         int row;
         int width;
@@ -15,22 +15,24 @@ public class JGridPanel extends JPanel {
         int spacing;
         Border border;
         int anchor;
-        boolean isVertical;
         float weightX;
         float weightY;
+        boolean scaleX;
+        boolean scaleY;
 
-        public Item(Component[] components, int column, int row) {
-            this.components = components;
+        public Item(JComponent component, int column, int row) {
+            this.component = component;
             this.column = column;
             this.row = row;
             width = 1;
-            externalPad = new Insets(5,5,5,5);
+            externalPad = new Insets(0,0,0,0);
             spacing = 5;
             border = BorderFactory.createLineBorder(Color.black);
             anchor = GridBagConstraints.CENTER;
-            isVertical = true;
-            weightX = 0;
+            weightX = 1;
             weightY = 0;
+            scaleX = true;
+            scaleY = true;
         }
     }
 
@@ -40,7 +42,7 @@ public class JGridPanel extends JPanel {
         setLayout(new GridBagLayout());
     }
 
-    public JGridPanel load(int column, int row, Component... component) {
+    public JGridPanel load(int column, int row, JComponent component) {
         item = new Item(component, column, row);
         return this;
     }
@@ -52,6 +54,26 @@ public class JGridPanel extends JPanel {
 
     public JGridPanel setPad(Insets externalPad) {
         item.externalPad = externalPad;
+        return this;
+    }
+
+    public JGridPanel setBottomPad(int pad) {
+        item.externalPad = new Insets(item.externalPad.top, item.externalPad.left, pad,item.externalPad.right);
+        return this;
+    }
+
+    public JGridPanel setTopPad(int pad) {
+        item.externalPad = new Insets(pad, item.externalPad.left,item.externalPad.bottom,item.externalPad.right);;
+        return this;
+    }
+
+    public JGridPanel setLeftPad(int pad) {
+        item.externalPad = new Insets(item.externalPad.top, pad,item.externalPad.bottom,item.externalPad.right);
+        return this;
+    }
+
+    public JGridPanel setRightPad(int pad) {
+        item.externalPad = new Insets(item.externalPad.top, item.externalPad.left,item.externalPad.bottom,pad);
         return this;
     }
 
@@ -85,14 +107,19 @@ public class JGridPanel extends JPanel {
         return this;
     }
 
-    public JGridPanel setHorizontal() {
-        item.isVertical = false;
-        return this;
-    }
-
     public JGridPanel setWeight(float x, float y) {
         item.weightX = x;
         item.weightY = y;
+        return this;
+    }
+
+    public JGridPanel removeScaleX() {
+        item.scaleX = false;
+        return this;
+    }
+
+    public JGridPanel removeScaleY() {
+        item.scaleY = false;
         return this;
     }
 
@@ -106,21 +133,18 @@ public class JGridPanel extends JPanel {
        c.weightx = item.weightX;
        c.weighty = item.weightY;
 
-       JPanel panel = new JPanel();
-       panel.setLayout(new BoxLayout(panel, item.isVertical ? BoxLayout.PAGE_AXIS : BoxLayout.LINE_AXIS));
-
-       for(int i=0; i<item.components.length; i++) {
-           panel.add(item.components[i]);
-           if(i<item.components.length-1)
-               panel.add(Box.createRigidArea(item.isVertical ? new Dimension(0,item.spacing) : new Dimension(item.spacing,0)));
-       }
+       if(item.scaleX && item.scaleY)
+            c.fill = GridBagConstraints.BOTH;
+       else if(item.scaleX)
+           c.fill = GridBagConstraints.HORIZONTAL;
+       else if(item.scaleY)
+           c.fill = GridBagConstraints.VERTICAL;
 
        if(item.border != null) {
-           panel.setBorder(item.border);
-           add(panel, c);
+           item.component.setBorder(item.border);
        }
 
-       add(panel, c);
+       add(item.component, c);
 
        item = null;
        return this;
