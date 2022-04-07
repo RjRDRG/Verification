@@ -21,19 +21,22 @@ public class PairPickerPanel extends JPanel {
 
         JGridPanel gp0 = new JGridPanel();
 
-        JLabel la0 = new JLabel(title0);
+        JLabel la0 = new JLabel(title0,SwingConstants.CENTER);
+        la0.setFont(new Font("Serif", Font.PLAIN, 20));
 
-        gp0.load(0,0, la0).removeScaleY().add();
+        gp0.load(0,0, la0).setItemBorder().removeScaleY().add();
 
-        JLabel la1 = new JLabel(title1);
+        JLabel la1 = new JLabel(title1,SwingConstants.CENTER);
+        la1.setFont(new Font("Serif", Font.PLAIN, 20));
 
-        gp0.load(1,0, la1).removeScaleY().add();
+        gp0.load(1,0, la1).setItemBorder().removeScaleY().add();
 
         final JList<String> ls0 = new JList<>();
         DefaultListModel<String> m0 = new DefaultListModel<>();
         m0.addAll(elementsList0);
         ls0.setModel(m0);
         ls0.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        if(!elementsList0.isEmpty()) ls0.setSelectedIndex(0);
         JScrollPane s0 = new JScrollPane(ls0);
 
         gp0.load(0,1, s0).add();
@@ -43,6 +46,7 @@ public class PairPickerPanel extends JPanel {
         m1.addAll(elementsList1);
         ls1.setModel(m1);
         ls1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        if(!elementsList1.isEmpty()) ls1.setSelectedIndex(0);
         JScrollPane s1 = new JScrollPane(ls1);
 
         gp0.load(1,1, s1).add();
@@ -50,7 +54,9 @@ public class PairPickerPanel extends JPanel {
         final JList<String> ls2 = new JList<>();
         DefaultListModel<String> m2 = new DefaultListModel<>();
         m2.addAll(pairList);
+        ls1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         ls2.setModel(m2);
+        if(!pairList.isEmpty()) ls2.setSelectedIndex(0);
         JScrollPane s2 = new JScrollPane(ls2);
 
         JButton bt0 = new JButton("Make Pair");
@@ -61,20 +67,38 @@ public class PairPickerPanel extends JPanel {
 
             if(ls0.getSelectedIndex()>=0 && ls1.getSelectedIndex()>=0) {
                 lm2.add(lm2.size(), ls0.getSelectedValue() + "  <->  " + ls1.getSelectedValue());
+                if(ls2.getSelectedIndex()<0) ls2.setSelectedIndex(0);
+
                 lm0.remove(ls0.getSelectedIndex());
+                if(!lm0.isEmpty()) ls0.setSelectedIndex(0);
                 lm1.remove(ls1.getSelectedIndex());
+                if(!lm1.isEmpty()) ls1.setSelectedIndex(0);
             }
         });
 
         gp0.load(0,2, bt0).setWidth(2).removeScaleY().add();
 
-        JLabel la2 = new JLabel("Pairs");
-
-        gp0.load(0,3, la2).setWidth(2).removeScaleY().add();
-
-        gp0.load(0,4, s2).setWidth(2).add();
+        gp0.load(0,3, s2).setWidth(2).add();
 
         JButton bt1 = new JButton("Remove");
+        bt1.addActionListener(e -> {
+            DefaultListModel<String> lm0 = (DefaultListModel<String>) ls0.getModel();
+            DefaultListModel<String> lm1 = (DefaultListModel<String>) ls1.getModel();
+            DefaultListModel<String> lm2 = (DefaultListModel<String>) ls2.getModel();
+
+            if(ls2.getSelectedIndex()>=0) {
+                String[] parts = ls2.getSelectedValue().split(" <-> ");
+
+                lm0.add(lm0.size(), parts[0]);
+                if(ls0.getSelectedIndex()<0) ls0.setSelectedIndex(0);
+
+                lm1.add(lm1.size(), parts[1]);
+                if(ls1.getSelectedIndex()<0) ls1.setSelectedIndex(0);
+
+                lm2.remove(ls2.getSelectedIndex());
+                if(!lm2.isEmpty()) ls2.setSelectedIndex(0);
+            }
+        });
 
         gp0.load(0,5, bt1).setWidth(2).removeScaleY().add();
 
@@ -104,8 +128,8 @@ class Test extends JFrame {
         setNimbusStyle();
 
         PairPickerPanel panel = new PairPickerPanel(
-                "Contract", newV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toList()),
-                "Prior Contract", oldV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toList()),
+                "Contract Endpoints: " + "./src/main/resources/new.yaml", newV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toList()),
+                "Prior Contract Endpoints: " + "./src/main/resources/old.yaml", oldV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toList()),
                 Collections.emptyList()
         );
 

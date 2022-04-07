@@ -92,6 +92,11 @@ public class JGridPanel extends JPanel {
         return this;
     }
 
+    public JGridPanel setItemBorder() {
+        item.border = BorderFactory.createEtchedBorder();
+        return this;
+    }
+
     public JGridPanel setAnchorLeft() {
         item.anchor = GridBagConstraints.LINE_START;
         return this;
