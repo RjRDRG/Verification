@@ -27,7 +27,7 @@ public class JGridPanel extends JPanel {
             width = 1;
             externalPad = new Insets(0,0,0,0);
             spacing = 5;
-            border = BorderFactory.createLineBorder(Color.black);
+            border = null;
             anchor = GridBagConstraints.CENTER;
             weightX = 1;
             weightY = 1;
@@ -89,11 +89,6 @@ public class JGridPanel extends JPanel {
 
     public JGridPanel setItemBorder(Border border) {
         item.border = border;
-        return this;
-    }
-
-    public JGridPanel removeItemBorder() {
-        item.border = null;
         return this;
     }
 

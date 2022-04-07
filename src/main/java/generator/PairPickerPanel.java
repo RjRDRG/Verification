@@ -23,7 +23,7 @@ public class PairPickerPanel extends JPanel {
 
         JLabel la0 = new JLabel(title0);
 
-        gp0.load(0,0, la0).removeScaleY().removeItemBorder().add();
+        gp0.load(0,0, la0).removeScaleY().add();
 
         JLabel la1 = new JLabel(title1);
 
@@ -36,7 +36,7 @@ public class PairPickerPanel extends JPanel {
         ls0.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane s0 = new JScrollPane(ls0);
 
-        gp0.load(0,1, s0).removeItemBorder().add();
+        gp0.load(0,1, s0).add();
 
         final JList<String> ls1 = new JList<>();
         DefaultListModel<String> m1 = new DefaultListModel<>();
@@ -45,7 +45,7 @@ public class PairPickerPanel extends JPanel {
         ls1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane s1 = new JScrollPane(ls1);
 
-        gp0.load(1,1, s1).removeItemBorder().add();
+        gp0.load(1,1, s1).add();
 
         final JList<String> ls2 = new JList<>();
         DefaultListModel<String> m2 = new DefaultListModel<>();
@@ -70,7 +70,7 @@ public class PairPickerPanel extends JPanel {
 
         JLabel la2 = new JLabel("Pairs");
 
-        gp0.load(0,3, la2).setWidth(2).removeItemBorder().removeScaleY().add();
+        gp0.load(0,3, la2).setWidth(2).removeScaleY().add();
 
         gp0.load(0,4, s2).setWidth(2).add();
 
