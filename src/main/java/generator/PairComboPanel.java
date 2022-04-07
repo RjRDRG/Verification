@@ -2,6 +2,7 @@ package generator;
 
 import contract.OpenApiContract;
 import contract.structures.Endpoint;
+import generator.ui.JColoredList;
 import generator.ui.JGridPanel;
 import generator.ui.RoundBorder;
 import io.swagger.parser.OpenAPIParser;
@@ -10,33 +11,28 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.awt.event.ActionEvent;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class PairComboPanel extends JPanel {
 
-    public final JButton submit;
     public Map<String,JComboBox<String>> pairs;
 
-    public PairComboPanel(String title0, List<String> elementsList0, String title1, List<String> elementsList1) {
+    public PairComboPanel(
+            List<String> elementsList0,
+            List<String> elementsList1,
+            Consumer<Boolean> okConsumer
+    ) {
         setLayout(new BorderLayout());
 
         pairs = new HashMap<>();
 
         JGridPanel gp0 = new JGridPanel();
-
-        JLabel la0 = new JLabel(title0, SwingConstants.CENTER);
-        la0.setFont(new Font("Serif", Font.PLAIN, 20));
-
-        gp0.load(0, 0, la0).removeScaleY().add();
-
-        JLabel la1 = new JLabel(title1, SwingConstants.CENTER);
-        la1.setFont(new Font("Serif", Font.PLAIN, 20));
-
-        gp0.load(1, 0, la1).removeScaleY().add();
 
         final List<String> elementsList1WithNone = new ArrayList<>(elementsList1.size()+1);
         elementsList1WithNone.add("none");
@@ -50,15 +46,21 @@ public class PairComboPanel extends JPanel {
             ((JLabel)c0.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
             c0.setFont(new Font("Serif", Font.PLAIN, 20));
             c0.setSelectedItem(elementsList0.get(i));
+            c0.addActionListener(e -> {
+                for(JComboBox<String> jComboBox : pairs.values()) {
+                    if(Objects.equals(jComboBox.getSelectedItem(), "none")) {
+                        okConsumer.accept(false);
+                        return;
+                    }
+                }
+                okConsumer.accept(true);
+            });
 
-            gp0.load(0, i + 1, la2).setItemBorder(new RoundBorder(Color.black)).add();
-            gp0.load(1, i + 1, c0).add();
+            gp0.load(0, i, la2).setItemBorder(new RoundBorder(Color.black)).add();
+            gp0.load(1, i, c0).add();
 
             pairs.put(elementsList0.get(i),c0);
         }
-
-        submit = new JButton("Submit");
-        gp0.load(0, elementsList0.size()+1, submit).setWidth(2).removeScaleY().add();
 
         add(gp0);
     }
@@ -86,8 +88,12 @@ class Test0 extends JFrame {
         setNimbusStyle();
 
         PairComboPanel panel = new PairComboPanel(
-                "Contract Endpoints: " + "./src/main/resources/new.yaml", newV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toList()),
-                "Prior Contract Endpoints: " + "./src/main/resources/old.yaml", oldV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toList())
+                newV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toList()),
+                oldV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toList()),
+                b-> {
+                    if(b) System.out.println("ok");
+                    else System.out.println("no no");
+                }
         );
 
         getContentPane().setLayout(new BorderLayout());

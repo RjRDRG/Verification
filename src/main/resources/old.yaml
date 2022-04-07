@@ -77,7 +77,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /pets/{id}:
+  /pet/{id}:
     get:
       description: Returns a user based on a single ID, if the user does not have access to the pet
       operationId: find pet by id

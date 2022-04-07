@@ -2,18 +2,14 @@ package generator;
 
 import contract.OpenApiContract;
 import contract.structures.Endpoint;
-import generator.old.ContractViewPanel;
-import generator.old.BBucket;
-import generator.utils.TriConsumer;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.*;
-import java.awt.event.WindowEvent;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 class MainFrame extends JFrame {
@@ -37,58 +33,20 @@ class MainFrame extends JFrame {
 
         setNimbusStyle();
 
-        TriConsumer<JList<String>> pair = (ls0,ls1,ls2) -> {
-            if(!(ls0.getSelectedIndex()>=0 && ls1.getSelectedIndex()>=0))
-                return;
+        Set<String> newEndpoints = newV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toSet());
+        Set<String> oldEndpoints = oldV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toSet());
 
-            PairComboPanel pairComboPanel = new PairComboPanel(
-                    "Endpoint Responses", new ArrayList<>(newV.getResponses(Endpoint.fromString(ls0.getSelectedValue()))),
-                    "Prior Endpoint Responses", new ArrayList<>(oldV.getResponses(Endpoint.fromString(ls1.getSelectedValue())))
-            );
+        Set<String> intersection = new HashSet<>(newEndpoints);
+        intersection.retainAll(oldEndpoints);
 
-            SinglePanelFrame frame = new SinglePanelFrame(pairComboPanel,new Dimension(500,500),30);
+        newEndpoints.removeAll(intersection);
+        oldEndpoints.removeAll(intersection);
 
-            pairComboPanel.submit.addActionListener(e -> {
-                DefaultListModel<String> lm0 = (DefaultListModel<String>) ls0.getModel();
-                DefaultListModel<String> lm1 = (DefaultListModel<String>) ls1.getModel();
-                DefaultListModel<String> lm2 = (DefaultListModel<String>) ls2.getModel();
+        DualPairPickerPanel panel = new DualPairPickerPanel(
+                "Contract Endpoints: " + "./src/main/resources/new.yaml", newEndpoints,
+                "Prior Contract Endpoints: " + "./src/main/resources/old.yaml", oldEndpoints,
+                intersection,
 
-                lm2.add(lm2.size(), ls0.getSelectedValue() + "  <->  " + ls1.getSelectedValue());
-                if(ls2.getSelectedIndex()<0) ls2.setSelectedIndex(0);
-
-                lm0.remove(ls0.getSelectedIndex());
-                if(!lm0.isEmpty()) ls0.setSelectedIndex(0);
-                lm1.remove(ls1.getSelectedIndex());
-                if(!lm1.isEmpty()) ls1.setSelectedIndex(0);
-
-                frame.setVisible(false);
-                frame.dispose();
-            });
-        };
-
-        TriConsumer<JList<String>> unpair = (ls0,ls1,ls2) -> {
-            DefaultListModel<String> lm0 = (DefaultListModel<String>) ls0.getModel();
-            DefaultListModel<String> lm1 = (DefaultListModel<String>) ls1.getModel();
-            DefaultListModel<String> lm2 = (DefaultListModel<String>) ls2.getModel();
-
-            if(ls2.getSelectedIndex()>=0) {
-                String[] parts = ls2.getSelectedValue().split(" <-> ");
-
-                lm0.add(lm0.size(), parts[0]);
-                if(ls0.getSelectedIndex()<0) ls0.setSelectedIndex(0);
-
-                lm1.add(lm1.size(), parts[1]);
-                if(ls1.getSelectedIndex()<0) ls1.setSelectedIndex(0);
-
-                lm2.remove(ls2.getSelectedIndex());
-                if(!lm2.isEmpty()) ls2.setSelectedIndex(0);
-            }
-        };
-
-        PairPickerPanel panel = new PairPickerPanel(pair, unpair,
-                "Contract Endpoints: " + "./src/main/resources/new.yaml", newV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toList()),
-                "Prior Contract Endpoints: " + "./src/main/resources/old.yaml", oldV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toList()),
-                Collections.emptyList()
         );
 
         int borderPad = 30;
