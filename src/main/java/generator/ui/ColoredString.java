@@ -2,7 +2,7 @@ package generator.ui;
 
 import java.awt.*;
 
-public class ColoredString {
+public class ColoredString extends Component{
     public final String string;
     public Color color;
 

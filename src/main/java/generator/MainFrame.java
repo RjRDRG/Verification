@@ -8,7 +8,9 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.*;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,6 +23,23 @@ class MainFrame extends JFrame {
     private MainFrame() {
         super();
 
+        setNimbusStyle();
+
+        int borderPad = 30;
+
+        getContentPane().setLayout(new BorderLayout());
+        getContentPane().add(Box.createRigidArea(new Dimension(0,borderPad)), BorderLayout.PAGE_START);
+        getContentPane().add(Box.createRigidArea(new Dimension(0,borderPad)), BorderLayout.PAGE_END);
+        getContentPane().add(Box.createRigidArea(new Dimension(borderPad,0)), BorderLayout.LINE_START);
+        getContentPane().add(Box.createRigidArea(new Dimension(borderPad,0)), BorderLayout.LINE_END);
+        getContentPane().add(getMainPanel(), BorderLayout.CENTER);
+        setSize(new Dimension(1000, 1000));
+        setResizable(true);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setVisible(true);
+    }
+
+    public JPanel getMainPanel() {
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);
         parseOptions.setResolveFully(true);
@@ -31,36 +50,35 @@ class MainFrame extends JFrame {
                 new OpenAPIParser().readLocation("./src/main/resources/new.yaml", null, parseOptions).getOpenAPI()
         );
 
-        setNimbusStyle();
+        Set<Endpoint> e0 = newV.getEndpoints();
+        Set<Endpoint> e1 = oldV.getEndpoints();
 
-        Set<String> newEndpoints = newV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toSet());
-        Set<String> oldEndpoints = oldV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toSet());
+        Set<Endpoint> intersection = new HashSet<>(e0);
+        intersection.retainAll(e1);
 
-        Set<String> intersection = new HashSet<>(newEndpoints);
-        intersection.retainAll(oldEndpoints);
+        e0.removeAll(intersection);
+        e1.removeAll(intersection);
 
-        newEndpoints.removeAll(intersection);
-        oldEndpoints.removeAll(intersection);
+        Map<String,Set<String>> ele0 = new HashMap<>();
+        for(Endpoint e : e0) {
+            ele0.put(e.toString(), new HashSet<>(newV.getResponses(e)));
+        }
 
-        DualPairPickerPanel panel = new DualPairPickerPanel(
-                "Contract Endpoints: " + "./src/main/resources/new.yaml", newEndpoints,
-                "Prior Contract Endpoints: " + "./src/main/resources/old.yaml", oldEndpoints,
-                intersection,
+        Map<String,Set<String>> ele1 = new HashMap<>();
+        for(Endpoint e : e1) {
+            ele1.put(e.toString(), new HashSet<>(oldV.getResponses(e)));
+        }
 
+        Map<String,Set<String>> ele2 = new HashMap<>();
+        for(Endpoint e : intersection) {
+            ele2.put(e.toString(), new HashSet<>(newV.getResponses(e)));
+        }
+
+        return new DualPairPickerPanel(
+                "Contract Endpoints: " + "./src/main/resources/new.yaml", ele0,
+                "Prior Contract Endpoints: " + "./src/main/resources/old.yaml", ele1,
+                ele2
         );
-
-        int borderPad = 30;
-
-        getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(Box.createRigidArea(new Dimension(0,borderPad)), BorderLayout.PAGE_START);
-        getContentPane().add(Box.createRigidArea(new Dimension(0,borderPad)), BorderLayout.PAGE_END);
-        getContentPane().add(Box.createRigidArea(new Dimension(borderPad,0)), BorderLayout.LINE_START);
-        getContentPane().add(Box.createRigidArea(new Dimension(borderPad,0)), BorderLayout.LINE_END);
-        getContentPane().add(panel, BorderLayout.CENTER);
-        setSize(new Dimension(1000, 1000));
-        setResizable(true);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setVisible(true);
     }
 
     public void setNimbusStyle() {

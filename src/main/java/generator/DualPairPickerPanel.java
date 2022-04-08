@@ -11,11 +11,8 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -30,17 +27,28 @@ public class DualPairPickerPanel extends JPanel {
             final Map<String,Set<String>> pairs
     ) {
         setLayout(new BorderLayout());
-
         JGridPanel gp0 = new JGridPanel();
+        add(gp0,BorderLayout.CENTER);
 
         //--------------------------------------------------------------------------------------------------------------
 
-        JLabel la0 = new JLabel(title0,SwingConstants.CENTER);
+        final JLabel la0 = new JLabel();               final JLabel la1 = new JLabel();
+        final JList<String> ls0 = new JList<>();       final JList<String> ls1 = new JList<>();
+        final JButton bt0 = new JButton();
+
+        final JColoredList ls2 = new JColoredList();   final ViewerPanel<PairComboPanel> viewerPanel = new ViewerPanel<>();
+        JButton bt1 = new JButton();
+
+        //--------------------------------------------------------------------------------------------------------------
+
+        la0.setText(title0);
+        la0.setAlignmentX(SwingConstants.CENTER);
         la0.setFont(new Font("Serif", Font.PLAIN, 20));
 
         gp0.load(0,0, la0).removeScaleY().add();
 
-        final JList<String> ls0 = new JList<>();
+        //--------------------------------------------------------------------------------------------------------------
+
         DefaultListModel<String> m0 = new DefaultListModel<>();
         m0.addAll(elements0.keySet());
         ls0.setModel(m0);
@@ -52,12 +60,14 @@ public class DualPairPickerPanel extends JPanel {
 
         //--------------------------------------------------------------------------------------------------------------
 
-        JLabel la1 = new JLabel(title1,SwingConstants.CENTER);
+        la1.setText(title1);
+        la1.setAlignmentX(SwingConstants.CENTER);
         la1.setFont(new Font("Serif", Font.PLAIN, 20));
 
         gp0.load(1,0, la1).removeScaleY().add();
 
-        final JList<String> ls1 = new JList<>();
+        //--------------------------------------------------------------------------------------------------------------
+
         DefaultListModel<String> m1 = new DefaultListModel<>();
         m1.addAll(elements1.keySet());
         ls1.setModel(m1);
@@ -69,75 +79,95 @@ public class DualPairPickerPanel extends JPanel {
 
         //--------------------------------------------------------------------------------------------------------------
 
-        final JColoredList ls2 = new JColoredList();
-        DefaultListModel<ColoredString> m2 = new DefaultListModel<>();
-        m2.addAll(pairs.keySet().stream().map(ColoredString::green).collect(Collectors.toList()));
-        ls1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        ls2.setModel(m2);
-        if(!pairs.isEmpty()) ls2.setSelectedIndex(0);
-        JScrollPane s2 = new JScrollPane(ls2);
-
-        gp0.load(0,3, s2).add();
-
-        //--------------------------------------------------------------------------------------------------------------
-
-        JButton bt0 = new JButton("Make Pair");
+        bt0.setText("Make Pair");
         bt0.addActionListener(e -> {
             if(!(ls0.getSelectedIndex()>=0 && ls1.getSelectedIndex()>=0))
                 return;
 
+            DefaultListModel<String> lm0 = (DefaultListModel<String>) ls0.getModel();
+            DefaultListModel<String> lm1 = (DefaultListModel<String>) ls1.getModel();
+            DefaultListModel<ColoredString> lm2 = (DefaultListModel<ColoredString>) ls2.getModel();
 
+            String se0 = ls0.getSelectedValue();
+            String se1 = ls1.getSelectedValue();
 
+            lm2.addElement(ColoredString.red(se0 + DIVIDER + se1));
+            if(ls2.getSelectedIndex()<0) ls2.setSelectedIndex(0);
+
+            viewerPanel.add(new PairComboPanel(
+                new ArrayList<>(elements0.get(se0)),
+                new ArrayList<>(elements1.get(se1)),
+                b -> {
+                    if(b) ls2.getSelectedValue().setGreen();
+                    else ls2.getSelectedValue().setRed();
+                }
+            ));
+
+            lm0.remove(ls0.getSelectedIndex());
+            lm1.remove(ls1.getSelectedIndex());
         });
 
         gp0.load(0,2, bt0).setWidth(2).removeScaleY().add();
 
         //--------------------------------------------------------------------------------------------------------------
 
-        ViewerPanel<PairComboPanel> viewerPanel = new ViewerPanel<>();
+        DefaultListModel<ColoredString> m2 = new DefaultListModel<>();
+
         for (Map.Entry<String,Set<String>> pair : pairs.entrySet()) {
+            m2.addElement(ColoredString.green(pair.getKey() + DIVIDER + pair.getKey()));
+
             viewerPanel.add(
-                new PairComboPanel(
-                    new ArrayList<>(pair.getValue()),
-                    new ArrayList<>(pair.getValue()),
-                    b -> {
-                        if(b) ls2.getSelectedValue().setGreen();
-                        else ls2.getSelectedValue().setRed();
-                    }
-                )
+                    new PairComboPanel(
+                            new ArrayList<>(pair.getValue()),
+                            new ArrayList<>(pair.getValue()),
+                            b -> {
+                                if(b) ls2.getSelectedValue().setGreen();
+                                else ls2.getSelectedValue().setRed();
+                            }
+                    )
             );
         }
 
-        gp0.load(1,3, s2).setWeight(0.3f,1.0f).add();
+        ls2.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        ls2.setModel(m2);
+        ls2.addListSelectionListener( e -> {
+            viewerPanel.setActive(ls2.getSelectedIndex());
+        });
+
+        if(!m2.isEmpty()) ls2.setSelectedIndex(0);
+        JScrollPane s2 = new JScrollPane(ls2);
+
+        gp0.load(0,3, s2).add();
 
         //--------------------------------------------------------------------------------------------------------------
 
-        JButton bt1 = new JButton("Unpair");
+        gp0.load(1,3, viewerPanel).setWeight(0.3f,1.0f).add();
+
+        //--------------------------------------------------------------------------------------------------------------
+
+        bt1.setText("Unpair");
         bt1.addActionListener(e -> {
             if(ls2.getSelectedIndex()<0)
                 return;
 
             DefaultListModel<String> lm0 = (DefaultListModel<String>) ls0.getModel();
             DefaultListModel<String> lm1 = (DefaultListModel<String>) ls1.getModel();
-            DefaultListModel<String> lm2 = (DefaultListModel<String>) ls2.getModel();
+            DefaultListModel<ColoredString> lm2 = (DefaultListModel<ColoredString>) ls2.getModel();
 
-            if(ls2.getSelectedIndex()>=0) {
-                String[] parts = ls2.getSelectedValue().split(DIVIDER);
+            String[] parts = ls2.getSelectedValue().string.split(DIVIDER);
 
-                lm0.add(lm0.size(), parts[0]);
-                if(ls0.getSelectedIndex()<0) ls0.setSelectedIndex(0);
+            lm0.addElement(parts[0]);
+            if(ls0.getSelectedIndex()<0) ls0.setSelectedIndex(0);
 
-                lm1.add(lm1.size(), parts[1]);
-                if(ls1.getSelectedIndex()<0) ls1.setSelectedIndex(0);
+            lm1.addElement(parts[1]);
+            if(ls1.getSelectedIndex()<0) ls1.setSelectedIndex(0);
 
-                lm2.remove(ls2.getSelectedIndex());
-                if(!lm2.isEmpty()) ls2.setSelectedIndex(0);
-            }
+            viewerPanel.remove(ls2.getSelectedIndex());
+            lm2.remove(ls2.getSelectedIndex());
+            if(!lm2.isEmpty()) ls2.setSelectedIndex(0);
         });
 
-        gp0.load(0,5, bt1).setWidth(2).removeScaleY().add();
-
-        add(gp0);
+        gp0.load(0,4, bt1).setWidth(2).removeScaleY().add();
     }
 }
 
@@ -162,10 +192,34 @@ class Test extends JFrame {
 
         setNimbusStyle();
 
+        Set<Endpoint> e0 = newV.getEndpoints();
+        Set<Endpoint> e1 = oldV.getEndpoints();
+
+        Set<Endpoint> intersection = new HashSet<>(e0);
+        intersection.retainAll(e1);
+
+        e0.removeAll(intersection);
+        e1.removeAll(intersection);
+
+        Map<String,Set<String>> ele0 = new HashMap<>();
+        for(Endpoint e : e0) {
+            ele0.put(e.toString(), new HashSet<>(newV.getResponses(e)));
+        }
+
+        Map<String,Set<String>> ele1 = new HashMap<>();
+        for(Endpoint e : e1) {
+            ele1.put(e.toString(), new HashSet<>(oldV.getResponses(e)));
+        }
+
+        Map<String,Set<String>> ele2 = new HashMap<>();
+        for(Endpoint e : intersection) {
+            ele2.put(e.toString(), new HashSet<>(newV.getResponses(e)));
+        }
+
         DualPairPickerPanel panel = new DualPairPickerPanel(
-                "Contract Endpoints: " + "./src/main/resources/new.yaml", newV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toSet()),
-                "Prior Contract Endpoints: " + "./src/main/resources/old.yaml", oldV.getEndpoints().stream().map(Endpoint::toString).collect(Collectors.toSet()),
-                Collections.emptySet()
+                "Contract Endpoints: " + "./src/main/resources/new.yaml", ele0,
+                "Prior Contract Endpoints: " + "./src/main/resources/old.yaml", ele1,
+                ele2
         );
 
         getContentPane().setLayout(new BorderLayout());

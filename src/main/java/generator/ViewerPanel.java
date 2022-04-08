@@ -21,6 +21,9 @@ public class ViewerPanel<T extends JPanel> extends JPanel {
     }
 
     public void remove(int index) {
+        if(active == panels.get(index)) {
+            remove(active);
+        }
         panels.remove(index);
     }
 
