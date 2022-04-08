@@ -105,6 +105,9 @@ public class DualPairPickerPanel extends JPanel {
 
             lm0.remove(ls0.getSelectedIndex());
             lm1.remove(ls1.getSelectedIndex());
+
+            if(!lm0.isEmpty()) ls0.setSelectedIndex(0);
+            if(!lm1.isEmpty()) ls1.setSelectedIndex(0);
         });
 
         gp0.load(0,2, bt0).setWidth(2).removeScaleY().add();

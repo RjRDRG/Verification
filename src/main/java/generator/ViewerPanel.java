@@ -31,8 +31,10 @@ public class ViewerPanel<T extends JPanel> extends JPanel {
         if(active != null) {
             remove(active);
         }
-        active = panels.get(activeIndex);
-        add(active, BorderLayout.CENTER);
+        if(activeIndex < panels.size() && activeIndex >= 0) {
+            active = panels.get(activeIndex);
+            add(active, BorderLayout.CENTER);
+        }
     }
 
 }
