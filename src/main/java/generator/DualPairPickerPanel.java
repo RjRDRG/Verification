@@ -71,13 +71,13 @@ public class DualPairPickerPanel extends JPanel {
 
         final JColoredList ls2 = new JColoredList();
         DefaultListModel<ColoredString> m2 = new DefaultListModel<>();
-        m2.addAll(pairs.keySet().stream().map(ColoredString::red).collect(Collectors.toList()));
+        m2.addAll(pairs.keySet().stream().map(ColoredString::green).collect(Collectors.toList()));
         ls1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         ls2.setModel(m2);
         if(!pairs.isEmpty()) ls2.setSelectedIndex(0);
         JScrollPane s2 = new JScrollPane(ls2);
 
-        gp0.load(0,3, s2).setWidth(2).add();
+        gp0.load(0,3, s2).add();
 
         //--------------------------------------------------------------------------------------------------------------
 
@@ -86,32 +86,31 @@ public class DualPairPickerPanel extends JPanel {
             if(!(ls0.getSelectedIndex()>=0 && ls1.getSelectedIndex()>=0))
                 return;
 
+
+
         });
 
         gp0.load(0,2, bt0).setWidth(2).removeScaleY().add();
 
         //--------------------------------------------------------------------------------------------------------------
 
-        List<PairComboPanel> pairComboPanels = new ArrayList<>(elements0.size());
         ViewerPanel<PairComboPanel> viewerPanel = new ViewerPanel<>();
-        for (Map.Entry<String,>) {
-
-        }
-        Consumer<Boolean> consumer = b -> {
-            if(b) ls2.getSelectedValue().setGreen();
-            else ls2.getSelectedValue().setRed();
-        };
-
-        if(ls2.getSelectedIndex() >= 0) {
-            PairComboPanel pairComboPanel = new PairComboPanel(
-                    new ArrayList<>(elements0.get(ls2.getSelectedValue().string.split(DIVIDER)[0])),
-                    new ArrayList<>(elements1.get(ls2.getSelectedValue().string.split(DIVIDER)[1].split(SECOND_DIVIDER)[0])),
-                    consumer
+        for (Map.Entry<String,Set<String>> pair : pairs.entrySet()) {
+            viewerPanel.add(
+                new PairComboPanel(
+                    new ArrayList<>(pair.getValue()),
+                    new ArrayList<>(pair.getValue()),
+                    b -> {
+                        if(b) ls2.getSelectedValue().setGreen();
+                        else ls2.getSelectedValue().setRed();
+                    }
+                )
             );
-            gp0.load(0,3, s2).setWidth(2).add();
-        } else {
-
         }
+
+        gp0.load(1,3, s2).setWeight(0.3f,1.0f).add();
+
+        //--------------------------------------------------------------------------------------------------------------
 
         JButton bt1 = new JButton("Unpair");
         bt1.addActionListener(e -> {
