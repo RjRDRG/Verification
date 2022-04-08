@@ -1,33 +1,30 @@
 package generator.ui;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 
 public class JGridPanel extends JPanel {
 
     private static class Item {
-        JComponent component;
+        Component component;
         int column;
         int row;
         int width;
         Insets externalPad;
         int spacing;
-        Border border;
         int anchor;
         float weightX;
         float weightY;
         boolean scaleX;
         boolean scaleY;
 
-        public Item(JComponent component, int column, int row) {
+        public Item(Component component, int column, int row) {
             this.component = component;
             this.column = column;
             this.row = row;
             width = 1;
             externalPad = new Insets(0,0,0,0);
             spacing = 5;
-            border = null;
             anchor = GridBagConstraints.CENTER;
             weightX = 1;
             weightY = 1;
@@ -42,7 +39,7 @@ public class JGridPanel extends JPanel {
         setLayout(new GridBagLayout());
     }
 
-    public JGridPanel load(int column, int row, JComponent component) {
+    public JGridPanel load(int column, int row, Component component) {
         item = new Item(component, column, row);
         return this;
     }
@@ -84,16 +81,6 @@ public class JGridPanel extends JPanel {
 
     public JGridPanel setSpacing(int spacing) {
         item.spacing = spacing;
-        return this;
-    }
-
-    public JGridPanel setItemBorder(Border border) {
-        item.border = border;
-        return this;
-    }
-
-    public JGridPanel setItemBorder() {
-        item.border = BorderFactory.createEtchedBorder();
         return this;
     }
 
@@ -145,10 +132,6 @@ public class JGridPanel extends JPanel {
            c.fill = GridBagConstraints.VERTICAL;
            c.weightx = 0;
            c.weighty = item.weightY;
-       }
-
-       if(item.border != null) {
-           item.component.setBorder(item.border);
        }
 
        add(item.component, c);

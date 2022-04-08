@@ -1,7 +1,6 @@
 package generator;
 
 import generator.ui.JGridPanel;
-import generator.ui.RoundBorder;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,7 +42,7 @@ public class PairComboPanel extends JPanel {
             c0.setSelectedItem(elementsList0.get(i));
             c0.addActionListener(this::callEvent);
 
-            gp0.load(0, i, la2).setItemBorder(new RoundBorder(Color.black)).add();
+            gp0.load(0, i, la2).add();
             gp0.load(1, i, c0).add();
 
             pairs.put(elementsList0.get(i),c0);

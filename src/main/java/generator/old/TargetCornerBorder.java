@@ -1,4 +1,4 @@
-package generator.ui;
+package generator.old;
 
 import javax.swing.border.AbstractBorder;
 import java.awt.*;

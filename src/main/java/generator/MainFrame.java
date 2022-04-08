@@ -19,6 +19,7 @@ import java.util.Set;
 class MainFrame extends JFrame {
 
     public static void main(String[] args) {
+
         FlatDarculaLaf.setup();
 
         new MainFrame();
@@ -27,17 +28,18 @@ class MainFrame extends JFrame {
     private MainFrame() {
         super();
 
-        int borderPad = 20;
-
         setTitle("Contract Evolution Architect");
 
         getContentPane().setLayout(new BorderLayout());
+
         JGridPanel top = new JGridPanel();
-        top.load(0,0, Box.createRigidArea(new Dimension(0,borderPad)));
-        getContentPane().add(new JSeparator(SwingConstants.HORIZONTAL), BorderLayout.PAGE_START);
-        getContentPane().add(Box.createRigidArea(new Dimension(0,borderPad)), BorderLayout.PAGE_END);
-        getContentPane().add(Box.createRigidArea(new Dimension(borderPad,0)), BorderLayout.LINE_START);
-        getContentPane().add(Box.createRigidArea(new Dimension(borderPad,0)), BorderLayout.LINE_END);
+        top.load(0,0, new JSeparator(SwingConstants.HORIZONTAL)).add();
+        top.load(0,1, Box.createRigidArea(new Dimension(0,20))).add();
+        getContentPane().add(top, BorderLayout.PAGE_START);
+
+        getContentPane().add(Box.createRigidArea(new Dimension(0,20)), BorderLayout.PAGE_END);
+        getContentPane().add(Box.createRigidArea(new Dimension(20,0)), BorderLayout.LINE_START);
+        getContentPane().add(Box.createRigidArea(new Dimension(20,0)), BorderLayout.LINE_END);
         getContentPane().add(getMainPanel(), BorderLayout.CENTER);
         setSize(new Dimension(1000, 1000));
         setResizable(true);
