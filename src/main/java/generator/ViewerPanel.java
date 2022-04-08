@@ -16,11 +16,11 @@ public class ViewerPanel<T extends JPanel> extends JPanel {
         this.active = null;
     }
 
-    public void add(T panel) {
+    public void addPanel(T panel) {
         panels.add(panel);
     }
 
-    public void remove(int index) {
+    public void removePanel(int index) {
         if(active == panels.get(index)) {
             remove(active);
         }

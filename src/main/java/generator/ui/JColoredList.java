@@ -21,13 +21,8 @@ class ColoredListCellRenderer extends DefaultListCellRenderer {
             Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             if (value instanceof ColoredString) {
                 ColoredString next = (ColoredString) value;
-
                 setText(next.string);
-                setBackground(next.color);
-
-                if (isSelected) {
-                    setBackground(getBackground().darker());
-                }
+                setForeground(next.color);
             }
             return c;
         }

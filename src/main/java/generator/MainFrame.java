@@ -25,7 +25,7 @@ class MainFrame extends JFrame {
 
         setNimbusStyle();
 
-        int borderPad = 30;
+        int borderPad = 20;
 
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(Box.createRigidArea(new Dimension(0,borderPad)), BorderLayout.PAGE_START);

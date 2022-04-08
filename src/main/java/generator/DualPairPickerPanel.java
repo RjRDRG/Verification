@@ -94,7 +94,7 @@ public class DualPairPickerPanel extends JPanel {
             lm2.addElement(ColoredString.red(se0 + DIVIDER + se1));
             if(ls2.getSelectedIndex()<0) ls2.setSelectedIndex(0);
 
-            viewerPanel.add(new PairComboPanel(
+            viewerPanel.addPanel(new PairComboPanel(
                 new ArrayList<>(elements0.get(se0)),
                 new ArrayList<>(elements1.get(se1)),
                 b -> {
@@ -116,7 +116,7 @@ public class DualPairPickerPanel extends JPanel {
         for (Map.Entry<String,Set<String>> pair : pairs.entrySet()) {
             m2.addElement(ColoredString.green(pair.getKey() + DIVIDER + pair.getKey()));
 
-            viewerPanel.add(
+            viewerPanel.addPanel(
                     new PairComboPanel(
                             new ArrayList<>(pair.getValue()),
                             new ArrayList<>(pair.getValue()),
@@ -131,17 +131,18 @@ public class DualPairPickerPanel extends JPanel {
         ls2.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         ls2.setModel(m2);
         ls2.addListSelectionListener( e -> {
-            viewerPanel.setActive(ls2.getSelectedIndex());
+            viewerPanel.setActive(e.getFirstIndex());
         });
 
         if(!m2.isEmpty()) ls2.setSelectedIndex(0);
         JScrollPane s2 = new JScrollPane(ls2);
 
-        gp0.load(0,3, s2).add();
+        JGridPanel gp1 = new JGridPanel();
 
-        //--------------------------------------------------------------------------------------------------------------
+        gp1.load(0,0, s2).setWeight(0.8f,1.0f).add();
+        gp1.load(1,0, viewerPanel).setWeight(0.2f,1.0f).add();
 
-        gp0.load(1,3, viewerPanel).setWeight(0.3f,1.0f).add();
+        gp0.load(0,3, gp1).setWidth(2).add();
 
         //--------------------------------------------------------------------------------------------------------------
 
@@ -162,94 +163,11 @@ public class DualPairPickerPanel extends JPanel {
             lm1.addElement(parts[1]);
             if(ls1.getSelectedIndex()<0) ls1.setSelectedIndex(0);
 
-            viewerPanel.remove(ls2.getSelectedIndex());
+            viewerPanel.removePanel(ls2.getSelectedIndex());
             lm2.remove(ls2.getSelectedIndex());
             if(!lm2.isEmpty()) ls2.setSelectedIndex(0);
         });
 
         gp0.load(0,4, bt1).setWidth(2).removeScaleY().add();
-    }
-}
-
-class Test extends JFrame {
-
-    public static void main(String[] args) {
-        new Test();
-    }
-
-    private Test() {
-        super();
-
-        ParseOptions parseOptions = new ParseOptions();
-        parseOptions.setResolve(true);
-        parseOptions.setResolveFully(true);
-
-        OpenApiContract oldV = new OpenApiContract(
-                new OpenAPIParser().readLocation("./src/main/resources/old.yaml", null, parseOptions).getOpenAPI());
-        OpenApiContract newV = new OpenApiContract(
-                new OpenAPIParser().readLocation("./src/main/resources/new.yaml", null, parseOptions).getOpenAPI()
-        );
-
-        setNimbusStyle();
-
-        Set<Endpoint> e0 = newV.getEndpoints();
-        Set<Endpoint> e1 = oldV.getEndpoints();
-
-        Set<Endpoint> intersection = new HashSet<>(e0);
-        intersection.retainAll(e1);
-
-        e0.removeAll(intersection);
-        e1.removeAll(intersection);
-
-        Map<String,Set<String>> ele0 = new HashMap<>();
-        for(Endpoint e : e0) {
-            ele0.put(e.toString(), new HashSet<>(newV.getResponses(e)));
-        }
-
-        Map<String,Set<String>> ele1 = new HashMap<>();
-        for(Endpoint e : e1) {
-            ele1.put(e.toString(), new HashSet<>(oldV.getResponses(e)));
-        }
-
-        Map<String,Set<String>> ele2 = new HashMap<>();
-        for(Endpoint e : intersection) {
-            ele2.put(e.toString(), new HashSet<>(newV.getResponses(e)));
-        }
-
-        DualPairPickerPanel panel = new DualPairPickerPanel(
-                "Contract Endpoints: " + "./src/main/resources/new.yaml", ele0,
-                "Prior Contract Endpoints: " + "./src/main/resources/old.yaml", ele1,
-                ele2
-        );
-
-        getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(panel, BorderLayout.CENTER);
-        setSize(new Dimension(1000, 1000));
-        setResizable(true);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setVisible(true);
-    }
-
-    public void setNimbusStyle() {
-        try {
-            UIManager.setLookAndFeel(new NimbusLookAndFeel());
-            UIManager.put("control", new Color(128, 128, 128));
-            UIManager.put("info", new Color(128, 128, 128));
-            UIManager.put("nimbusBase", new Color(18, 30, 49));
-            UIManager.put("nimbusAlertYellow", new Color(248, 187, 0));
-            UIManager.put("nimbusDisabledText", new Color(128, 128, 128));
-            UIManager.put("nimbusFocus", new Color(115, 164, 209));
-            UIManager.put("nimbusGreen", new Color(176, 179, 50));
-            UIManager.put("nimbusInfoBlue", new Color(66, 139, 221));
-            UIManager.put("nimbusLightBackground", new Color(18, 30, 49));
-            UIManager.put("nimbusOrange", new Color(191, 98, 4));
-            UIManager.put("nimbusRed", new Color(169, 46, 34));
-            UIManager.put("nimbusSelectedText", new Color(255, 255, 255));
-            UIManager.put("nimbusSelectionBackground", new Color(104, 93, 156));
-            UIManager.put("text", new Color(230, 230, 230));
-            SwingUtilities.updateComponentTreeUI(this);
-        } catch (UnsupportedLookAndFeelException exc) {
-            System.err.println("Nimbus: Unsupported Look and feel!");
-        }
     }
 }
