@@ -1,20 +1,12 @@
 package generator;
 
-import contract.OpenApiContract;
-import contract.structures.Endpoint;
 import generator.ui.ColoredString;
 import generator.ui.JColoredList;
 import generator.ui.JGridPanel;
-import io.swagger.parser.OpenAPIParser;
-import io.swagger.v3.parser.core.models.ParseOptions;
 
 import javax.swing.*;
-import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.*;
 import java.util.*;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class DualPairPickerPanel extends JPanel {
 
@@ -43,7 +35,6 @@ public class DualPairPickerPanel extends JPanel {
 
         la0.setText(title0);
         la0.setAlignmentX(SwingConstants.CENTER);
-        la0.setFont(new Font("Serif", Font.PLAIN, 20));
 
         gp0.load(0,0, la0).removeScaleY().add();
 
@@ -62,7 +53,6 @@ public class DualPairPickerPanel extends JPanel {
 
         la1.setText(title1);
         la1.setAlignmentX(SwingConstants.CENTER);
-        la1.setFont(new Font("Serif", Font.PLAIN, 20));
 
         gp0.load(1,0, la1).removeScaleY().add();
 
@@ -91,17 +81,26 @@ public class DualPairPickerPanel extends JPanel {
             String se0 = ls0.getSelectedValue();
             String se1 = ls1.getSelectedValue();
 
-            lm2.addElement(ColoredString.red(se0 + DIVIDER + se1));
-            if(ls2.getSelectedIndex()<0) ls2.setSelectedIndex(0);
+            ColoredString coloredString = ColoredString.red(se0 + DIVIDER + se1);
+            lm2.addElement(coloredString);
 
-            viewerPanel.addPanel(new PairComboPanel(
-                new ArrayList<>(elements0.get(se0)),
-                new ArrayList<>(elements1.get(se1)),
-                b -> {
-                    if(b) ls2.getSelectedValue().setGreen();
-                    else ls2.getSelectedValue().setRed();
-                }
-            ));
+            PairComboPanel pairComboPanel = new PairComboPanel(
+                    new ArrayList<>(Optional.ofNullable(elements0.get(se0)).orElse(pairs.get(se0))),
+                    new ArrayList<>(Optional.ofNullable(elements1.get(se1)).orElse(pairs.get(se1))),
+                    b -> {
+                        if(b) coloredString.setGreen();
+                        else coloredString.setRed();
+                        repaint();
+                        revalidate();
+                    }
+            );
+
+            pairComboPanel.callEvent(null);
+
+            viewerPanel.addPanel(pairComboPanel);
+
+            ls2.setSelectedIndex(lm2.size()-1);
+            viewerPanel.setActive(lm2.size()-1);
 
             lm0.remove(ls0.getSelectedIndex());
             lm1.remove(ls1.getSelectedIndex());
@@ -126,6 +125,8 @@ public class DualPairPickerPanel extends JPanel {
                             b -> {
                                 if(b) ls2.getSelectedValue().setGreen();
                                 else ls2.getSelectedValue().setRed();
+                                repaint();
+                                revalidate();
                             }
                     )
             );
@@ -134,7 +135,9 @@ public class DualPairPickerPanel extends JPanel {
         ls2.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         ls2.setModel(m2);
         ls2.addListSelectionListener( e -> {
-            viewerPanel.setActive(e.getFirstIndex());
+            if (!e.getValueIsAdjusting()){
+                viewerPanel.setActive(((JColoredList)e.getSource()).getSelectedIndex());
+            }
         });
 
         if(!m2.isEmpty()) ls2.setSelectedIndex(0);
@@ -142,10 +145,10 @@ public class DualPairPickerPanel extends JPanel {
 
         JGridPanel gp1 = new JGridPanel();
 
-        gp1.load(0,0, s2).setWeight(0.8f,1.0f).add();
-        gp1.load(1,0, viewerPanel).setWeight(0.2f,1.0f).add();
+        gp1.load(0,0, s2).add();
+        gp1.load(1,0, viewerPanel).removeScaleX().add();
 
-        gp0.load(0,3, gp1).setWidth(2).add();
+        gp0.load(0,3, gp1).setTopPad(20).setWidth(2).add();
 
         //--------------------------------------------------------------------------------------------------------------
 

@@ -23,8 +23,11 @@ public class ViewerPanel<T extends JPanel> extends JPanel {
     public void removePanel(int index) {
         if(active == panels.get(index)) {
             remove(active);
+            active = null;
         }
         panels.remove(index);
+        repaint();
+        revalidate();
     }
 
     public void setActive(int activeIndex) {
@@ -35,6 +38,8 @@ public class ViewerPanel<T extends JPanel> extends JPanel {
             active = panels.get(activeIndex);
             add(active, BorderLayout.CENTER);
         }
+        repaint();
+        revalidate();
     }
 
 }
