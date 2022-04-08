@@ -5,6 +5,7 @@ import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import contract.OpenApiContract;
 import contract.structures.Endpoint;
+import generator.ui.JGridPanel;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 
@@ -28,8 +29,12 @@ class MainFrame extends JFrame {
 
         int borderPad = 20;
 
+        setTitle("Contract Evolution Architect");
+
         getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(Box.createRigidArea(new Dimension(0,0)), BorderLayout.PAGE_START);
+        JGridPanel top = new JGridPanel();
+        top.load(0,0, Box.createRigidArea(new Dimension(0,borderPad)));
+        getContentPane().add(new JSeparator(SwingConstants.HORIZONTAL), BorderLayout.PAGE_START);
         getContentPane().add(Box.createRigidArea(new Dimension(0,borderPad)), BorderLayout.PAGE_END);
         getContentPane().add(Box.createRigidArea(new Dimension(borderPad,0)), BorderLayout.LINE_START);
         getContentPane().add(Box.createRigidArea(new Dimension(borderPad,0)), BorderLayout.LINE_END);
