@@ -82,9 +82,9 @@ class MainFrame extends JFrame {
             ele2.put(e.toString(), new HashSet<>(newV.getResponses(e)));
         }
 
-        return new DualPairPickerPanel(
-                "Contract Endpoints: " + "./src/main/resources/new.yaml", ele0,
-                "Prior Contract Endpoints: " + "./src/main/resources/old.yaml", ele1,
+        return new PairPickerPanel(
+                "Endpoints: " + "./src/main/resources/new.yaml", ele0,
+                "Prior Endpoints: " + "./src/main/resources/old.yaml", ele1,
                 ele2
         );
     }
