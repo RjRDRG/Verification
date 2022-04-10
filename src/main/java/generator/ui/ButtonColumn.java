@@ -23,7 +23,7 @@ public class ButtonColumn extends AbstractCellEditor
         implements TableCellRenderer, TableCellEditor, ActionListener, MouseListener
 {
     private JTable table;
-    private Action action;
+    private Action[] actions;
     private int mnemonic;
     private Border originalBorder;
     private Border focusBorder;
@@ -40,13 +40,13 @@ public class ButtonColumn extends AbstractCellEditor
      *  of the specified column.
      *
      *  @param table the table containing the button renderer/editor
-     *  @param action the Action to be invoked when the button is invoked
+     *  @param actions the Action to be invoked when the button is invoked
      *  @param column the column to which the button renderer/editor is added
      */
-    public ButtonColumn(JTable table, Action action, int column, Color buttonBackground)
+    public ButtonColumn(JTable table, int column, Color buttonBackground, Action... actions)
     {
         this.table = table;
-        this.action = action;
+        this.actions = actions;
 
         renderButton = new JButton();
         editButton = new JButton();
@@ -194,7 +194,9 @@ public class ButtonColumn extends AbstractCellEditor
                 table,
                 ActionEvent.ACTION_PERFORMED,
                 "" + row);
-        action.actionPerformed(event);
+
+        for(Action action : actions)
+            action.actionPerformed(event);
     }
 
     //

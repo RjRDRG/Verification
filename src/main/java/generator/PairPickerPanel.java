@@ -1,18 +1,12 @@
 package generator;
 
-import generator.ui.ButtonColumn;
-import generator.ui.ColoredString;
-import generator.ui.JColoredList;
-import generator.ui.JGridPanel;
+import generator.ui.*;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
+import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.*;
 import java.util.List;
@@ -84,10 +78,12 @@ public class PairPickerPanel extends JPanel {
             DefaultListModel<String> lm0 = (DefaultListModel<String>) ls0.getModel();
             DefaultListModel<String> lm1 = (DefaultListModel<String>) ls1.getModel();
 
-            String se0 = ls0.getSelectedValue();
-            String se1 = ls1.getSelectedValue();
+            String endpoint = ls0.getSelectedValue();
+            String priorEndpoint = ls1.getSelectedValue();
+            Set<String> responses = Optional.ofNullable(elements0.get(endpoint)).orElse(pairs.get(endpoint));
+            Set<String> responseOptions = Optional.ofNullable(elements1.get(priorEndpoint)).orElse(pairs.get(priorEndpoint));
 
-
+            buildRow(t0,endpoint,priorEndpoint,responses,responseOptions);
 
             lm0.remove(ls0.getSelectedIndex());
             lm1.remove(ls1.getSelectedIndex());
@@ -110,26 +106,22 @@ public class PairPickerPanel extends JPanel {
                 List.of("")
         ).stream().flatMap(Collection::stream).toArray(String[]::new);
 
-        Object[][] data = new Object[pairs.size()][columnNames.length];
-        int i=0;
-        for(Map.Entry<String,Set<String>> endpoint : pairs.entrySet()) {
-            data[i][0] = endpoint.getKey();
-            data[i][1] = endpoint.getKey();
-            int j=2;
-            for(String response : responses) {
-                if(endpoint.getValue().contains(response)) {
-                    data[i][j]=response;
-                }
-                else {
-                    data[i][j]="-";
-                }
-                j++;
+        Action removeRow = new AbstractAction()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                int row = Integer.parseInt( e.getActionCommand() );
+                ((DefaultListModel<String>) ls0.getModel()).addElement((String) t0.getModel().getValueAt(row,0));
+                ((DefaultListModel<String>) ls1.getModel()).addElement((String) t0.getModel().getValueAt(row,1));
             }
-            data[i][columnNames.length-1] = "X";
-            i++;
+        };
+
+        t0.buildTable(columnNames, new HashSet<>(responses), removeRow);
+
+        for(Map.Entry<String,Set<String>> entry : pairs.entrySet()) {
+            buildRow(t0, entry.getKey(), entry.getKey(), entry.getValue(), entry.getValue());
         }
 
-        t0.setModel(new DefaultTableModel(data,columnNames));
         JScrollPane s2 = new JScrollPane(t0);
 
         gp0.load(0,3, s2).setTopPad(10).setWidth(2).add();
@@ -138,37 +130,50 @@ public class PairPickerPanel extends JPanel {
 
 
     }
+
+    private void buildRow(PairTable table, String endpoint, String previousEndpoint, Set<String> responses, Set<String> responseOptions) {
+        String[] row = new String[table.getColumnCount()];
+        row[0] = endpoint;
+        row[1] = previousEndpoint;
+
+        for(int i=2; i<table.getColumnCount()-1; i++) {
+            String columnName = table.getColumnName(i);
+            if(responses.contains(columnName)) {
+                if(responseOptions.contains(columnName))
+                    row[i] = columnName;
+            }
+        }
+
+        row[table.getColumnCount()-1]="X";
+
+        table.getModel().addRow(row,responseOptions);
+    }
 }
 
 class PairTable extends JTable {
+
+    private final MultiTableModel model;
+
     PairTable() {
         super();
+        model = new MultiTableModel();
     }
 
-    void setModel(DefaultTableModel m) {
-        super.setModel(m);
+    @Override
+    public TableCellEditor getCellEditor(int row, int column) {
+        String[] options = model.getOptions(row, column);
+        if (options != null) {
+            JComboBox<String> comboBox = new JComboBox<>(options);
+            comboBox.addActionListener((e)-> model.setValueAt(comboBox.getSelectedItem(), row, column));
+            return new DefaultCellEditor(comboBox);
+        } else {
+            return super.getCellEditor(row, column);
+        }
+    }
 
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment( SwingConstants.CENTER );
-        setDefaultRenderer(Object.class, centerRenderer);
-
-        DefaultTableCellRenderer leftRenderer = new DefaultTableCellRenderer();
-        leftRenderer.setHorizontalAlignment( SwingConstants.LEFT );
-        getColumnModel().getColumn(0).setCellRenderer( leftRenderer );
-        getColumnModel().getColumn(1).setCellRenderer( leftRenderer );
-
-        Action delete = new AbstractAction()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-                JTable table = (JTable)e.getSource();
-                int modelRow = Integer.valueOf( e.getActionCommand() );
-                ((DefaultTableModel)table.getModel()).removeRow(modelRow);
-            }
-        };
-
-        ButtonColumn buttonColumn = new ButtonColumn(this, delete, m.getColumnCount()-1, new Color(199, 84, 80));
-        buttonColumn.setMnemonic(KeyEvent.VK_D);
+    void buildTable(String[] columnNames, Set<String> columnWithOptions, Action additionalRemoveRowAction) {
+        model.setColumns(columnNames,columnWithOptions);
+        setModel(model);
 
         getTableHeader().setReorderingAllowed(false);
         getTableHeader().setResizingAllowed(false);
@@ -176,7 +181,67 @@ class PairTable extends JTable {
         setFocusable(false);
         setShowGrid(true);
 
-        getColumnModel().getColumn( m.getColumnCount()-1).setMaxWidth(30);
-        getColumnModel().getColumn( m.getColumnCount()-1).setMinWidth(30);
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        setDefaultRenderer(Object.class, centerRenderer);
+
+        DefaultTableCellRenderer leftRenderer = new DefaultTableCellRenderer();
+        leftRenderer.setHorizontalAlignment( SwingConstants.LEFT );
+        getColumnModel().getColumn(0).setCellRenderer(leftRenderer);
+        getColumnModel().getColumn(1).setCellRenderer(leftRenderer);
+
+        Action removeRow = new AbstractAction()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                int modelRow = Integer.parseInt( e.getActionCommand() );
+                model.removeRow(modelRow);
+            }
+        };
+
+        ButtonColumn buttonColumn = new ButtonColumn(this, model.getColumnCount()-1, new Color(199, 84, 80), additionalRemoveRowAction, removeRow);
+        buttonColumn.setMnemonic(KeyEvent.VK_D);
+        getColumnModel().getColumn( model.getColumnCount()-1).setMaxWidth(30);
+        getColumnModel().getColumn( model.getColumnCount()-1).setMinWidth(30);
+    }
+
+    public MultiTableModel getModel() {
+        return model;
+    }
+}
+
+class MultiTableModel extends DefaultTableModel {
+
+    Set<String> columnWithOptions;
+    List<Set<String>> rowOptions;
+
+    MultiTableModel() {
+        super();
+        rowOptions = new ArrayList<>();
+    }
+
+    public void setColumns(String[] columnNames, Set<String> columnWithOptions) {
+        setColumnIdentifiers(columnNames);
+        this.columnWithOptions = columnWithOptions;
+    }
+
+    public void addRow(String[] row, Set<String> options) {
+        super.addRow(row);
+        rowOptions.add(options);
+    }
+
+    @Override
+    public void removeRow(int row) {
+        super.removeRow(row);
+        rowOptions.remove(row);
+    }
+
+    public String[] getOptions(int row, int column) {
+        if (columnWithOptions.contains(getColumnName(column))) {
+            return rowOptions.get(row).toArray(new String[0]);
+        }
+        else {
+            return null;
+        }
     }
 }
