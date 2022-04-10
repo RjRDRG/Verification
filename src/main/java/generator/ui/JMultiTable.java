@@ -69,7 +69,6 @@ public class JMultiTable extends JTable {
         getTableHeader().setResizingAllowed(false);
         setCellSelectionEnabled(false);
         setFocusable(false);
-        setCellSelectionEnabled(false);
         setShowGrid(true);
 
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
@@ -96,15 +95,26 @@ public class JMultiTable extends JTable {
         getColumnModel().getColumn( model.getColumnCount()-1).setMinWidth(30);
     }
 
-    public void addRow(String[] row, Set<String> options, Set<String> columns) {
+    public void addRow(String[] row, Set<String> options, Set<Integer> columns) {
         model.addRow(row,options,columns);
+    }
+
+    public String[][] getValues() {
+        String[][] values = new String[model.getRowCount()][model.getColumnCount()-1];
+        for(int i=0; i<model.getRowCount(); i++) {
+            for(int j=0; j<model.getColumnCount()-1; j++) {
+                String mVal = (String) model.getValueAt(i,j);
+                values[i][j] = mVal.equals(MISSING) ? null : mVal;
+            }
+        }
+        return values;
     }
 }
 
 class MultiTableModel extends DefaultTableModel {
 
     java.util.List<Set<String>> rowOptions;
-    List<Set<String>> columnsWithOptions;
+    List<Set<Integer>> columnsWithOptions;
 
     public MultiTableModel() {
         super();
@@ -116,7 +126,7 @@ class MultiTableModel extends DefaultTableModel {
         setColumnIdentifiers(columnNames);
     }
 
-    public void addRow(String[] row, Set<String> options, Set<String> columns) {
+    public void addRow(String[] row, Set<String> options, Set<Integer> columns) {
         super.addRow(row);
         rowOptions.add(options);
         columnsWithOptions.add(columns);
@@ -130,7 +140,7 @@ class MultiTableModel extends DefaultTableModel {
     }
 
     public String[] getOptions(int row, int column) {
-        if (columnsWithOptions.get(row).contains(getColumnName(column))) {
+        if (columnsWithOptions.get(row).contains(column)) {
             return rowOptions.get(row).toArray(new String[0]);
         }
         else {

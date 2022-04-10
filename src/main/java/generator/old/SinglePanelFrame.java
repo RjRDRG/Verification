@@ -1,4 +1,4 @@
-package generator;
+package generator.old;
 
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;

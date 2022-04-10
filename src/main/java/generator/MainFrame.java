@@ -1,8 +1,7 @@
 package generator;
 
 import com.formdev.flatlaf.FlatDarculaLaf;
-import com.formdev.flatlaf.FlatDarkLaf;
-import com.formdev.flatlaf.FlatLightLaf;
+import contract.IContract;
 import contract.OpenApiContract;
 import contract.structures.Endpoint;
 import generator.ui.JGridPanel;
@@ -18,6 +17,9 @@ import java.util.Set;
 
 class MainFrame extends JFrame {
 
+    public final IContract contract;
+    public final IContract priorContract;
+
     public static void main(String[] args) {
 
         FlatDarculaLaf.setup();
@@ -27,6 +29,16 @@ class MainFrame extends JFrame {
 
     private MainFrame() {
         super();
+
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+
+        contract = new OpenApiContract(
+                new OpenAPIParser().readLocation("./src/main/resources/old.yaml", null, parseOptions).getOpenAPI());
+        priorContract = new OpenApiContract(
+                new OpenAPIParser().readLocation("./src/main/resources/new.yaml", null, parseOptions).getOpenAPI()
+        );
 
         setTitle("Contract Evolution Architect");
 
@@ -48,18 +60,8 @@ class MainFrame extends JFrame {
     }
 
     public JPanel getMainPanel() {
-        ParseOptions parseOptions = new ParseOptions();
-        parseOptions.setResolve(true);
-        parseOptions.setResolveFully(true);
-
-        OpenApiContract oldV = new OpenApiContract(
-                new OpenAPIParser().readLocation("./src/main/resources/old.yaml", null, parseOptions).getOpenAPI());
-        OpenApiContract newV = new OpenApiContract(
-                new OpenAPIParser().readLocation("./src/main/resources/new.yaml", null, parseOptions).getOpenAPI()
-        );
-
-        Set<Endpoint> e0 = newV.getEndpoints();
-        Set<Endpoint> e1 = oldV.getEndpoints();
+        Set<Endpoint> e0 = contract.getEndpoints();
+        Set<Endpoint> e1 = priorContract.getEndpoints();
 
         Set<Endpoint> intersection = new HashSet<>(e0);
         intersection.retainAll(e1);
@@ -69,20 +71,20 @@ class MainFrame extends JFrame {
 
         Map<String,Set<String>> ele0 = new HashMap<>();
         for(Endpoint e : e0) {
-            ele0.put(e.toString(), new HashSet<>(newV.getResponses(e)));
+            ele0.put(e.toString(), new HashSet<>(contract.getResponses(e)));
         }
 
         Map<String,Set<String>> ele1 = new HashMap<>();
         for(Endpoint e : e1) {
-            ele1.put(e.toString(), new HashSet<>(oldV.getResponses(e)));
+            ele1.put(e.toString(), new HashSet<>(priorContract.getResponses(e)));
         }
 
         Map<String,Set<String>> ele2 = new HashMap<>();
         for(Endpoint e : intersection) {
-            ele2.put(e.toString(), new HashSet<>(newV.getResponses(e)));
+            ele2.put(e.toString(), new HashSet<>(contract.getResponses(e)));
         }
 
-        return new PairPickerPanel(
+        return new EndpointPanel(
                 "Endpoints: " + "./src/main/resources/new.yaml", ele0,
                 "Prior Endpoints: " + "./src/main/resources/old.yaml", ele1,
                 ele2

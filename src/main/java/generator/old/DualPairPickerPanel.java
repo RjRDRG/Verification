@@ -1,5 +1,6 @@
-package generator;
+package generator.old;
 
+import generator.ui.JViewerPanel;
 import generator.ui.ColoredString;
 import generator.ui.JColoredList;
 import generator.ui.JGridPanel;
@@ -28,7 +29,7 @@ public class DualPairPickerPanel extends JPanel {
         final JList<String> ls0 = new JList<>();       final JList<String> ls1 = new JList<>();
         final JButton bt0 = new JButton();
 
-        final JColoredList ls2 = new JColoredList();   final ViewerPanel<PairComboPanel> viewerPanel = new ViewerPanel<>();
+        final JColoredList ls2 = new JColoredList();
         JButton bt1 = new JButton();
 
         //--------------------------------------------------------------------------------------------------------------
@@ -97,10 +98,8 @@ public class DualPairPickerPanel extends JPanel {
 
             pairComboPanel.callEvent(null);
 
-            viewerPanel.addPanel(pairComboPanel);
 
             ls2.setSelectedIndex(lm2.size()-1);
-            viewerPanel.setActive(lm2.size()-1);
 
             lm0.remove(ls0.getSelectedIndex());
             lm1.remove(ls1.getSelectedIndex());
@@ -118,25 +117,13 @@ public class DualPairPickerPanel extends JPanel {
         for (Map.Entry<String,Set<String>> pair : pairs.entrySet()) {
             m2.addElement(ColoredString.green(pair.getKey() + DIVIDER + pair.getKey()));
 
-            viewerPanel.addPanel(
-                    new PairComboPanel(
-                            new ArrayList<>(pair.getValue()),
-                            new ArrayList<>(pair.getValue()),
-                            b -> {
-                                if(b) ls2.getSelectedValue().setGreen();
-                                else ls2.getSelectedValue().setRed();
-                                repaint();
-                                revalidate();
-                            }
-                    )
-            );
+
         }
 
         ls2.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         ls2.setModel(m2);
         ls2.addListSelectionListener( e -> {
             if (!e.getValueIsAdjusting()){
-                viewerPanel.setActive(((JColoredList)e.getSource()).getSelectedIndex());
             }
         });
 
@@ -146,7 +133,6 @@ public class DualPairPickerPanel extends JPanel {
         JGridPanel gp1 = new JGridPanel();
 
         gp1.load(0,0, s2).add();
-        gp1.load(1,0, viewerPanel).removeScaleX().add();
 
         gp0.load(0,3, gp1).setTopPad(20).setWidth(2).add();
 
@@ -169,7 +155,6 @@ public class DualPairPickerPanel extends JPanel {
             lm1.addElement(parts[1]);
             if(ls1.getSelectedIndex()<0) ls1.setSelectedIndex(0);
 
-            viewerPanel.removePanel(ls2.getSelectedIndex());
             lm2.remove(ls2.getSelectedIndex());
             if(!lm2.isEmpty()) ls2.setSelectedIndex(0);
         });

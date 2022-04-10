@@ -3,16 +3,15 @@ package generator;
 import generator.ui.*;
 
 import javax.swing.*;
-import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class PairPickerPanel extends JPanel {
+public class EndpointPanel extends JPanel {
 
-    public PairPickerPanel(
+    public EndpointPanel(
             String title0, final Map<String,Set<String>> elements0,
             String title1, final Map<String,Set<String>> elements1,
             final Map<String,Set<String>> pairs
@@ -67,7 +66,7 @@ public class PairPickerPanel extends JPanel {
 
         //--------------------------------------------------------------------------------------------------------------
 
-        bt0.setText("Make Pair");
+        bt0.setText("Pair Endpoints");
         bt0.setFocusable(false);
         bt0.addActionListener(e -> {
             if(!(ls0.getSelectedIndex()>=0 && ls1.getSelectedIndex()>=0))
@@ -96,10 +95,11 @@ public class PairPickerPanel extends JPanel {
                 .flatMap(Set::stream)
                 .distinct()
                 .sorted()
+                .map(r -> "Response : " + r)
                 .collect(Collectors.toList());
 
         String[] columnNames = List.of(
-                List.of("Endpoint", "Prior Endpoint"),
+                List.of("Endpoint", "Prior Endpoint", "Request"),
                 responses,
                 List.of("")
         ).stream().flatMap(Collection::stream).toArray(String[]::new);
@@ -114,7 +114,7 @@ public class PairPickerPanel extends JPanel {
             }
         };
 
-        t0.buildTable(columnNames, Set.of(0,1), removeRow);
+        t0.buildTable(columnNames, Set.of(0,1,2), removeRow);
 
         for(Map.Entry<String,Set<String>> entry : pairs.entrySet()) {
             buildRow(t0, entry.getKey(), entry.getKey(), entry.getValue(), entry.getValue());
@@ -123,6 +123,11 @@ public class PairPickerPanel extends JPanel {
         JScrollPane s2 = new JScrollPane(t0);
 
         gp0.load(0,3, s2).setTopPad(10).setWidth(2).add();
+
+        JButton next = new JButton("Next");
+        next.setFocusable(false);
+
+        gp0.load(1,4, next).removeScaleY().removeScaleX().setAnchorRight().setTopPad(5).add();
 
         //--------------------------------------------------------------------------------------------------------------
 
@@ -133,9 +138,10 @@ public class PairPickerPanel extends JPanel {
         String[] row = new String[table.getColumnCount()];
         row[0] = endpoint;
         row[1] = previousEndpoint;
+        row[2] = "Request";
 
-        for(int i=2; i<table.getColumnCount()-1; i++) {
-            String columnName = table.getColumnName(i);
+        for(int i=3; i<table.getColumnCount()-1; i++) {
+            String columnName = table.getColumnName(i).replace("Response : ","");
             if(responses.contains(columnName)) {
                 if(responseOptions.contains(columnName))
                     row[i] = columnName;
@@ -148,6 +154,11 @@ public class PairPickerPanel extends JPanel {
 
         row[table.getColumnCount()-1]="X";
 
-        table.addRow(row, responseOptions, responses);
+        Set<Integer> columnsWithOptions = new HashSet<>();
+        for(int i=3; i<table.getColumnCount()-1; i++) {
+            if(responses.contains(table.getColumnName(i).replace("Response : ","")))
+                columnsWithOptions.add(i);
+        }
+        table.addRow(row, responseOptions, columnsWithOptions);
     }
 }

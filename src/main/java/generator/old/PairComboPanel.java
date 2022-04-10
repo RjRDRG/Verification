@@ -1,4 +1,4 @@
-package generator;
+package generator.old;
 
 import generator.ui.JGridPanel;
 
