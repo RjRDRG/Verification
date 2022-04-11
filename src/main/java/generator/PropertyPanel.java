@@ -10,12 +10,11 @@ import generator.ui.JViewerPanel;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.TreeNode;
 import java.awt.*;
 import java.util.*;
-import java.util.List;
 
 public class PropertyPanel extends JPanel {
 
@@ -36,11 +35,14 @@ public class PropertyPanel extends JPanel {
             int c = t0.getSelectedColumn();
             int r = t0.getSelectedRow();
 
-            if(c<2 || t0.getValueAt(r, c) == null)
-                return;
-
-            v0.setActive(r, c-2);
-            v1.setActive(r, c-2);
+            if(c<2 || t0.getValueAt(r, c) == null) {
+                v0.setActiveEmpty();
+                v1.setActiveEmpty();
+            }
+            else {
+                v0.setActive(r, c - 2);
+                v1.setActive(r, c - 2);
+            }
         });
 
         gp0.load(0,0, t0.getTableHeader()).removeScaleY().setWidth(2).add();
@@ -100,9 +102,12 @@ class JMessageTable extends JTable {
         getTableHeader().setReorderingAllowed(false);
         getTableHeader().setResizingAllowed(false);
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
         setCellSelectionEnabled(true);
         setFocusable(true);
         setShowGrid(true);
+
+        setGridColor(Color.red);
 
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
@@ -112,6 +117,36 @@ class JMessageTable extends JTable {
         leftRenderer.setHorizontalAlignment( SwingConstants.LEFT );
         getColumnModel().getColumn(0).setCellRenderer(leftRenderer);
         getColumnModel().getColumn(1).setCellRenderer(leftRenderer);
+    }
+
+    @Override
+    public Component prepareRenderer(TableCellRenderer renderer, int row, int col) {
+        JLabel comp = (JLabel)super.prepareRenderer(renderer, row, col);
+        String value = (String) getModel().getValueAt(row, col);
+        if (col>1 && value != null) {
+            comp.setBackground(new Color(60, 63, 65));
+            if(isCellSelected(row,col))
+                comp.setBorder(BorderFactory.createLoweredBevelBorder());
+            else
+                comp.setBorder(BorderFactory.createRaisedBevelBorder());
+        }
+        else {
+            comp.setBackground(new Color(43, 43, 43));
+        }
+        return comp;
+    }
+
+    @Override
+    public boolean editCellAt(int row, int column, EventObject e) {
+        return false;
+    }
+
+    @Override
+    public void changeSelection(int rowIndex, int columnIndex, boolean toggle, boolean extend) {
+        if (columnIndex == 0 || columnIndex == 1 || getValueAt(rowIndex,columnIndex) == null) {
+           return;
+        }
+        super.changeSelection(rowIndex, columnIndex, toggle, extend);
     }
 }
 
