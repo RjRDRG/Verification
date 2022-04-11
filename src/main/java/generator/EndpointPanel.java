@@ -128,15 +128,9 @@ public class EndpointPanel extends JPanel {
 
         JButton next = new JButton("Next");
         next.setFocusable(false);
-        next.addActionListener(e -> {
-            JFrame frame = new JFrame();
-            frame.getContentPane().setLayout(new BorderLayout());
-            frame.add(new PropertyPanel(t0.getValues(),t0.getColumnNames()),BorderLayout.CENTER);
-            frame.setSize(new Dimension(1000, 1000));
-            frame.setResizable(true);
-            frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-            frame.setVisible(true);
-        });
+        next.addActionListener(e ->
+            new SinglePanelFrame("Contract Evolution Constructor", new PropertyPanel(t0.getValues(),t0.getColumnNames()),new Dimension(1000, 1000),20)
+        );
 
         gp0.load(1,4, next).removeScaleY().removeScaleX().setAnchorRight().setTopPad(5).add();
 

@@ -8,8 +8,10 @@ import generator.ui.JGridBagPanel;
 import generator.ui.JViewerPanel;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -31,7 +33,9 @@ public class PropertyPanel extends JPanel {
 
         //--------------------------------------------------------------------------------------------------------------
 
-        t0.getSelectionModel().addListSelectionListener(e -> {
+        ListSelectionListener selectionListener = e -> {
+            if(e.getValueIsAdjusting())return;
+
             int c = t0.getSelectedColumn();
             int r = t0.getSelectedRow();
 
@@ -43,10 +47,17 @@ public class PropertyPanel extends JPanel {
                 v0.setActive(r, c - 2);
                 v1.setActive(r, c - 2);
             }
-        });
+        };
 
-        gp0.load(0,0, t0.getTableHeader()).removeScaleY().setWidth(2).add();
-        gp0.load(0,1, t0).removeScaleY().setWidth(2).add();
+        t0.getSelectionModel().addListSelectionListener(selectionListener);
+        t0.getColumnModel().getSelectionModel().addListSelectionListener(selectionListener);
+
+        JGridBagPanel gp1 = new JGridBagPanel();
+        gp1.load(0,0, t0.getTableHeader()).removeScaleY().add();
+        gp1.load(0,1, t0).removeScaleY().add();
+        gp1.setBorder(BorderFactory.createLineBorder(new Color(97, 99, 101)));
+
+        gp0.load(0,0, gp1).removeScaleY().setWidth(2).add();
 
         //--------------------------------------------------------------------------------------------------------------
 
@@ -63,7 +74,7 @@ public class PropertyPanel extends JPanel {
             }
         }
 
-        gp0.load(0,2, v0).add();
+        gp0.load(0,1, v0).add();
 
         //--------------------------------------------------------------------------------------------------------------
 
@@ -80,7 +91,7 @@ public class PropertyPanel extends JPanel {
             }
         }
 
-        gp0.load(1,2, v1).add();
+        gp0.load(1,1, v1).add();
 
         //--------------------------------------------------------------------------------------------------------------
 

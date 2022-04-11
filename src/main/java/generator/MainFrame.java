@@ -40,7 +40,7 @@ public class MainFrame extends JFrame {
                 new OpenAPIParser().readLocation("./src/main/resources/old.yaml", null, parseOptions).getOpenAPI()
         );
 
-        setTitle("Contract Evolution Architect");
+        setTitle("Contract Evolution Constructor");
 
         getContentPane().setLayout(new BorderLayout());
 
