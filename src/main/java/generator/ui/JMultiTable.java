@@ -104,10 +104,18 @@ public class JMultiTable extends JTable {
         for(int i=0; i<model.getRowCount(); i++) {
             for(int j=0; j<model.getColumnCount()-1; j++) {
                 String mVal = (String) model.getValueAt(i,j);
-                values[i][j] = mVal.equals(MISSING) ? null : mVal;
+                values[i][j] = mVal.equals(BLANK) ? null : mVal;
             }
         }
         return values;
+    }
+
+    public String[] getColumnNames() {
+        String[] c = new String[model.getColumnCount()-1];
+        for(int i=0; i<model.getColumnCount()-1; i++) {
+            c[i] = model.getColumnName(i);
+        }
+        return c;
     }
 }
 

@@ -1,6 +1,6 @@
 package generator.old;
 
-import generator.ui.JGridPanel;
+import generator.ui.JGridBagPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,7 +26,7 @@ public class PairComboPanel extends JPanel {
         this.pairs = new HashMap<>();
         this.okConsumer = okConsumer;
 
-        JGridPanel gp0 = new JGridPanel();
+        JGridBagPanel gp0 = new JGridBagPanel();
 
         final List<String> elementsList1WithNone = new ArrayList<>(elementsList1.size()+1);
         elementsList1WithNone.add(NONE);

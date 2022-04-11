@@ -1,9 +1,8 @@
 package generator.old;
 
-import generator.ui.JViewerPanel;
 import generator.ui.ColoredString;
 import generator.ui.JColoredList;
-import generator.ui.JGridPanel;
+import generator.ui.JGridBagPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,7 +19,7 @@ public class DualPairPickerPanel extends JPanel {
             final Map<String,Set<String>> pairs
     ) {
         setLayout(new BorderLayout());
-        JGridPanel gp0 = new JGridPanel();
+        JGridBagPanel gp0 = new JGridBagPanel();
         add(gp0,BorderLayout.CENTER);
 
         //--------------------------------------------------------------------------------------------------------------
@@ -130,7 +129,7 @@ public class DualPairPickerPanel extends JPanel {
         if(!m2.isEmpty()) ls2.setSelectedIndex(0);
         JScrollPane s2 = new JScrollPane(ls2);
 
-        JGridPanel gp1 = new JGridPanel();
+        JGridBagPanel gp1 = new JGridBagPanel();
 
         gp1.load(0,0, s2).add();
 

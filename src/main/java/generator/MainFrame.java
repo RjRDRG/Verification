@@ -4,7 +4,7 @@ import com.formdev.flatlaf.FlatDarculaLaf;
 import contract.IContract;
 import contract.OpenApiContract;
 import contract.structures.Endpoint;
-import generator.ui.JGridPanel;
+import generator.ui.JGridBagPanel;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 
@@ -15,10 +15,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-class MainFrame extends JFrame {
+public class MainFrame extends JFrame {
 
-    public final IContract contract;
-    public final IContract priorContract;
+    public static IContract contract;
+    public static IContract priorContract;
 
     public static void main(String[] args) {
 
@@ -37,14 +37,14 @@ class MainFrame extends JFrame {
         contract = new OpenApiContract(
                 new OpenAPIParser().readLocation("./src/main/resources/old.yaml", null, parseOptions).getOpenAPI());
         priorContract = new OpenApiContract(
-                new OpenAPIParser().readLocation("./src/main/resources/new.yaml", null, parseOptions).getOpenAPI()
+                new OpenAPIParser().readLocation("./src/main/resources/old.yaml", null, parseOptions).getOpenAPI()
         );
 
         setTitle("Contract Evolution Architect");
 
         getContentPane().setLayout(new BorderLayout());
 
-        JGridPanel top = new JGridPanel();
+        JGridBagPanel top = new JGridBagPanel();
         top.load(0,0, new JSeparator(SwingConstants.HORIZONTAL)).add();
         top.load(0,1, Box.createRigidArea(new Dimension(0,20))).add();
         getContentPane().add(top, BorderLayout.PAGE_START);
