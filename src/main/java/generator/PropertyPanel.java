@@ -118,8 +118,6 @@ class JMessageTable extends JTable {
         setFocusable(true);
         setShowGrid(true);
 
-        setGridColor(Color.red);
-
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
         setDefaultRenderer(Object.class, centerRenderer);
@@ -134,15 +132,16 @@ class JMessageTable extends JTable {
     public Component prepareRenderer(TableCellRenderer renderer, int row, int col) {
         JLabel comp = (JLabel)super.prepareRenderer(renderer, row, col);
         String value = (String) getModel().getValueAt(row, col);
-        if (col>1 && value != null) {
-            comp.setBackground(new Color(60, 63, 65));
-            if(isCellSelected(row,col))
-                comp.setBorder(BorderFactory.createLoweredBevelBorder());
-            else
-                comp.setBorder(BorderFactory.createRaisedBevelBorder());
-        }
-        else {
-            comp.setBackground(new Color(43, 43, 43));
+        if(col>1) {
+            if (value != null) {
+                comp.setBackground(new Color(60, 63, 65));
+                if (isCellSelected(row, col))
+                    comp.setBorder(BorderFactory.createLoweredBevelBorder());
+                else
+                    comp.setBorder(BorderFactory.createRaisedBevelBorder());
+            } else {
+                comp.setBackground(new Color(43, 43, 43));
+            }
         }
         return comp;
     }
