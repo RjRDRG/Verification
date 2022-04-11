@@ -1,7 +1,5 @@
 package generator.old;
 
-import generator.ui.ColoredString;
-import generator.ui.JColoredList;
 import generator.ui.JGridBagPanel;
 
 import javax.swing.*;

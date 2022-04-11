@@ -69,7 +69,7 @@ public class JMultiTable extends JTable {
         getTableHeader().setResizingAllowed(false);
         setCellSelectionEnabled(false);
         setFocusable(false);
-        setShowGrid(true);
+        setShowGrid(false);
 
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);

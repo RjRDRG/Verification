@@ -23,6 +23,7 @@ public class MainFrame extends JFrame {
     public static void main(String[] args) {
 
         FlatDarculaLaf.setup();
+        UIManager.put("Tree.paintLines", true);
 
         new MainFrame();
     }

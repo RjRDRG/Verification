@@ -9,8 +9,6 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
-
 public class EndpointPanel extends JPanel {
 
     public EndpointPanel(
@@ -129,7 +127,7 @@ public class EndpointPanel extends JPanel {
         JButton next = new JButton("Next");
         next.setFocusable(false);
         next.addActionListener(e ->
-            new SinglePanelFrame("Contract Evolution Constructor", new PropertyPanel(t0.getValues(),t0.getColumnNames()),new Dimension(1000, 1000),20)
+            new SinglePanelFrame("Contract Evolution Constructor", new MessagePanel(t0.getValues(),t0.getColumnNames()),new Dimension(1000, 1000),20)
         );
 
         gp0.load(1,4, next).removeScaleY().removeScaleX().setAnchorRight().setTopPad(5).add();
