@@ -63,6 +63,9 @@ public class JViewerPanel<T extends JPanel> extends JPanel {
         revalidate();
     }
 
+    public void addSelectionListener() {
+    }
+
     private JPanel makeEmptyPanel() {
         JPanel empty = new JPanel();
         empty.setBackground(new Color(70, 73, 75));

@@ -36,7 +36,7 @@ public class MainFrame extends JFrame {
         parseOptions.setResolveFully(true);
 
         contract = new OpenApiContract(
-                new OpenAPIParser().readLocation("./src/main/resources/old.yaml", null, parseOptions).getOpenAPI());
+                new OpenAPIParser().readLocation("./src/main/resources/new.yaml", null, parseOptions).getOpenAPI());
         priorContract = new OpenApiContract(
                 new OpenAPIParser().readLocation("./src/main/resources/old.yaml", null, parseOptions).getOpenAPI()
         );
