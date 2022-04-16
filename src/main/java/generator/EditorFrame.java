@@ -1,12 +1,9 @@
 package generator;
 
-import com.formdev.flatlaf.FlatDarculaLaf;
 import contract.IContract;
-import contract.OpenApiContract;
 import contract.structures.Endpoint;
 import generator.ui.JGridBagPanel;
-import io.swagger.parser.OpenAPIParser;
-import io.swagger.v3.parser.core.models.ParseOptions;
+import generator.ui.JViewerPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,33 +12,41 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class MainFrame extends JFrame {
+public class EditorFrame extends JFrame {
 
-    public static IContract contract;
-    public static IContract priorContract;
+    public static IContract CONTRACT;
+    public static IContract PRIOR_CONTRACT;
 
-    public static void main(String[] args) {
+    JViewerPanel v0;
+    EndpointPanel endpointPanel;
+    MessagePanel messagePanel;
 
-        FlatDarculaLaf.setup();
-        UIManager.put("Tree.paintLines", true);
-
-        new MainFrame();
-    }
-
-    private MainFrame() {
+    public EditorFrame(IContract contract, IContract priorContract) {
         super();
 
-        ParseOptions parseOptions = new ParseOptions();
-        parseOptions.setResolve(true);
-        parseOptions.setResolveFully(true);
+        CONTRACT = contract;
+        PRIOR_CONTRACT = priorContract;
 
-        contract = new OpenApiContract(
-                new OpenAPIParser().readLocation("./src/main/resources/new.yaml", null, parseOptions).getOpenAPI());
-        priorContract = new OpenApiContract(
-                new OpenAPIParser().readLocation("./src/main/resources/old.yaml", null, parseOptions).getOpenAPI()
-        );
+        endpointPanel = getEndpointPanel(contract,priorContract);
+        endpointPanel.next.addActionListener(e0 -> {
+            messagePanel = endpointPanel.getNextPanel();
+            messagePanel.back.addActionListener(e1 -> {
+                getContentPane().remove(messagePanel);
+                getContentPane().add(endpointPanel, BorderLayout.CENTER);
+                repaint();
+                revalidate();
+            });
+            messagePanel.submit.addActionListener(e1 -> {
+                //TODO
+                System.exit(1);
+            });
+            getContentPane().remove(endpointPanel);
+            getContentPane().add(messagePanel, BorderLayout.CENTER);
+            repaint();
+            revalidate();
+        });
 
-        setTitle("Contract Evolution Constructor");
+        setTitle("Contract Evolution Editor");
 
         getContentPane().setLayout(new BorderLayout());
 
@@ -49,18 +54,20 @@ public class MainFrame extends JFrame {
         top.load(0,0, new JSeparator(SwingConstants.HORIZONTAL)).add();
         top.load(0,1, Box.createRigidArea(new Dimension(0,20))).add();
         getContentPane().add(top, BorderLayout.PAGE_START);
-
         getContentPane().add(Box.createRigidArea(new Dimension(0,20)), BorderLayout.PAGE_END);
         getContentPane().add(Box.createRigidArea(new Dimension(20,0)), BorderLayout.LINE_START);
         getContentPane().add(Box.createRigidArea(new Dimension(20,0)), BorderLayout.LINE_END);
-        getContentPane().add(getMainPanel(), BorderLayout.CENTER);
+        getContentPane().add(endpointPanel, BorderLayout.CENTER);
+
         setSize(new Dimension(1000, 1000));
         setResizable(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setVisible(true);
     }
 
-    public JPanel getMainPanel() {
+
+
+    public EndpointPanel getEndpointPanel(IContract contract, IContract priorContract) {
         Set<Endpoint> e0 = contract.getEndpoints();
         Set<Endpoint> e1 = priorContract.getEndpoints();
 

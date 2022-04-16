@@ -1,10 +1,9 @@
-package generator;
+package generator.old;
 
 import contract.IContract;
 import contract.structures.Endpoint;
 import contract.structures.Property;
 import contract.structures.PropertyKey;
-import generator.old.MainFrame;
 import generator.ui.JGridBagPanel;
 import generator.ui.JViewerPanel;
 
@@ -20,34 +19,34 @@ import java.util.*;
 
 public class MessagePanel extends JPanel {
 
-    final JGridBagPanel gp0;
-
-    final JLabel l0;
-    final JMessageTable t0;
-
-    final JViewerPanel<JMessagePanel> v0;
-
-    public final JButton back;
-    public final JButton submit;
-
     public MessagePanel(String[][] data, String[] dataHeader) {
         setLayout(new BorderLayout());
-        gp0 = new JGridBagPanel();
+        final JGridBagPanel gp0 = new JGridBagPanel();
 
         //--------------------------------------------------------------------------------------------------------------
 
-        l0 = new JLabel();
-        t0 = new JMessageTable(data, dataHeader);
+        final JGridBagPanel gp1 = new JGridBagPanel();
+        final JLabel l0 = new JLabel();
+        final JMessageTable t0 = new JMessageTable(data, dataHeader);
 
-        v0 = new JViewerPanel<>(t0.getColumnCount()-2);
+        final JGridBagPanel gp2a = new JGridBagPanel();
+        final JLabel l1 = new JLabel();
+        final JViewerPanel<JTreePanel> v0 = new JViewerPanel<>(t0.getColumnCount()-2);
+        final JPropertyPanel p0 = new JPropertyPanel();
 
-        back = new JButton();
-        submit = new JButton();
+        final JGridBagPanel gp2b = new JGridBagPanel();
+        final JLabel l2 = new JLabel();
+        final JViewerPanel<JTreePanel> v1 = new JViewerPanel<>(t0.getColumnCount()-2);
+        final JPropertyPanel p1 = new JPropertyPanel();
+
+        final JGridBagPanel gp2c = new JGridBagPanel();
+        final JLabel l3 = new JLabel();
+        final JTable t2 = new JTable();
 
         //--------------------------------------------------------------------------------------------------------------
 
         l0.setText("Messages");
-        gp0.load(0,0, l0).setWidth(2).removeScaleY().add();
+        gp1.load(0,0, l0).add();
 
         ListSelectionListener selectionListener = e -> {
             if(e.getValueIsAdjusting())return;
@@ -57,9 +56,14 @@ public class MessagePanel extends JPanel {
 
             if(c<2 || t0.getValueAt(r, c) == null) {
                 v0.setActiveEmpty();
+                v1.setActiveEmpty();
             }
             else {
+                l1.setText("Properties: " + t0.getValueAt(r,0) + " " + t0.getColumnName(c).replace("Response : ",""));
                 v0.setActive(r, c - 2);
+
+                l2.setText("Properties: " + t0.getValueAt(r,1) + " " + t0.getValueAt(r,c));
+                v1.setActive(r, c - 2);
             }
         };
 
@@ -68,139 +72,87 @@ public class MessagePanel extends JPanel {
 
         final JGridBagPanel gpAux0 = new JGridBagPanel();
         gpAux0.load(0,0, t0.getTableHeader()).removeScaleY().add();
-        gpAux0.load(0,1, t0).removeScaleY().removeScaleY().add();
+        gpAux0.load(0,1, t0).removeScaleY().add();
         gpAux0.setBorder(BorderFactory.createLineBorder(new Color(97, 99, 101)));
 
-        gp0.load(0,1, gpAux0).removeScaleY().setWidth(2).add();
+        gp1.load(0,1, gpAux0).add();
 
         //--------------------------------------------------------------------------------------------------------------
+
+        l1.setText("Properties: ");
+
+        gp2a.load(0,0, l1).removeScaleY().add();
 
         for(int j=0; j<t0.getRowCount(); j++) {
             for (int i = 2; i < t0.getColumnCount(); i++) {
                 Endpoint endpoint = Endpoint.fromString((String) t0.getValueAt(j,0));
-                Endpoint priorEndpoint = Endpoint.fromString((String) t0.getValueAt(j,1));
                 if(t0.getValueAt(j, i) != null) {
                     String message = t0.getColumnName(i).replace("Response : ","");
-                    String priorMessage = (String) t0.getValueAt(j,i);
                     v0.addPanel(
                             j, i - 2,
-                            new JMessagePanel(new JTreePanel(endpoint, message, EditorFrame.CONTRACT), new JTreePanel(priorEndpoint, priorMessage, EditorFrame.PRIOR_CONTRACT))
+                            new JTreePanel(endpoint, message, MainFrame.contract)
                     );
                 }
             }
         }
 
-        gp0.load(0,2, v0).setWidth(2).setTopPad(15).add();
+        gp2a.load(0,1, v0).add();
+
+        gp2a.load(0,2, p0).removeScaleY().setTopPad(5).add();
 
         //--------------------------------------------------------------------------------------------------------------
 
-        back.setText("Back");
-        gp0.load(0,3, back).removeScaleX().removeScaleY().setAnchorLeft().setTopPad(5).add();
+        l2.setText("Properties: ");
 
-        submit.setText("Submit");
-        gp0.load(1,3, submit).removeScaleX().removeScaleY().setAnchorRight().setTopPad(5).add();
+        gp2b.load(0,0, l2).removeScaleY().add();
 
-        add(gp0,BorderLayout.CENTER);
-    }
-
-}
-
-class JMessagePanel extends JPanel {
-    final JGridBagPanel gp0;
-
-    final JGridBagPanel gpa;
-    final JLabel l0;
-    final JTreePanel t0;
-    final JPropertyPanel p0;
-
-    final JGridBagPanel gpb;
-    final JLabel l1;
-    final JTreePanel t1;
-    final JPropertyPanel p1;
-
-    final JGridBagPanel gpc;
-    final JLabel l2;
-    final JTable t2;
-
-    public JMessagePanel(JTreePanel treePanel, JTreePanel treePanel1) {
-        setLayout(new BorderLayout());
-        gp0 = new JGridBagPanel();
-
-        //--------------------------------------------------------------------------------------------------------------
-
-        gpa = new JGridBagPanel();
-        l0 = new JLabel();
-        t0 = treePanel;
-        p0 = new JPropertyPanel();
-
-        gpb = new JGridBagPanel();
-        l1 = new JLabel();
-        t1 = treePanel1;
-        p1 = new JPropertyPanel();
-
-        gpc = new JGridBagPanel();
-        l2 = new JLabel();
-        t2 = new JTable();
-
-        //--------------------------------------------------------------------------------------------------------------
-
-        l0.setText("Properties: ");
-        gpa.load(0,0, l0).removeScaleY().add();
-
-        t0.tree.addTreeSelectionListener(e -> {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) t0.tree.getLastSelectedPathComponent();
-            Object nodeInfo = node.getUserObject();
-            if(nodeInfo instanceof Property) {
-                p0.viewProperty((Property) nodeInfo);
+        for(int j=0; j<t0.getRowCount(); j++) {
+            for (int i = 2; i < t0.getColumnCount(); i++) {
+                Endpoint priorEndpoint = Endpoint.fromString((String) t0.getValueAt(j,1));
+                if(t0.getValueAt(j, i) != null) {
+                    String priorMessage = (String) t0.getValueAt(j,i);
+                    v1.addPanel(
+                            j, i - 2,
+                            new JTreePanel(priorEndpoint, priorMessage, MainFrame.priorContract)
+                    );
+                }
             }
-        });
-        gpa.load(0,1, t0).add();
+        }
 
-        gpa.load(0,2, p0).removeScaleY().setTopPad(5).add();
+        gp2b.load(0,1, v1).add();
 
-        //--------------------------------------------------------------------------------------------------------------
-
-        l1.setText("Prior Properties: ");
-
-        gpb.load(0,0, l1).removeScaleY().add();
-
-        t1.tree.addTreeSelectionListener(e -> {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) t1.tree.getLastSelectedPathComponent();
-            Object nodeInfo = node.getUserObject();
-            if(nodeInfo instanceof Property) {
-                p1.viewProperty((Property) nodeInfo);
-            }
-        });
-        gpb.load(0,1, t1).add();
-
-        gpb.load(0,2, p1).removeScaleY().setTopPad(5).add();
+        gp2b.load(0,2, p1).removeScaleY().setTopPad(5).add();
 
         //--------------------------------------------------------------------------------------------------------------
 
-        l2.setText("Resolutions");
+        l3.setText("Resolutions");
 
-        gpc.load(0,0, l2).removeScaleY().add();
-        gpc.load(0,1, t2).add();
+        gp2c.load(0,0, l3).removeScaleY().add();
+        gp2c.load(0,1, t2).add();
 
         //--------------------------------------------------------------------------------------------------------------
 
-        Dimension d0 = gpa.getPreferredSize();
+        gp0.load(0,0, gp1).removeScaleY().setWidth(3).add();
+
+        Dimension d0 = gp2a.getPreferredSize();
         d0.width = 180;
-        gpa.setPreferredSize(d0);
-        gp0.load(0,1, gpa).setWeight(0.3f,1).add();
+        gp2a.setPreferredSize(d0);
+        gp0.load(0,1, gp2a).setTopPad(20).setWeight(0.3f,1).add();
 
-        Dimension d1 = gpb.getPreferredSize();
+        Dimension d1 = gp2b.getPreferredSize();
         d1.width = 180;
-        gpb.setPreferredSize(d1);
-        gp0.load(1,1, gpb).setWeight(0.3f,1).setLeftPad(10).add();
+        gp2b.setPreferredSize(d1);
+        gp0.load(1,1, gp2b).setTopPad(20).setWeight(0.3f,1).setLeftPad(10).add();
 
-        Dimension d2 = gpc.getPreferredSize();
+        Dimension d2 = gp2c.getPreferredSize();
         d2.width = 240;
-        gpc.setPreferredSize(d2);
-        gp0.load(2,1, gpc).setWeight(0.4f,1).setLeftPad(20).add();
+        gp2c.setPreferredSize(d2);
+        gp0.load(2,1, gp2c).setTopPad(20).setWeight(0.4f,1).setLeftPad(20).add();
 
         add(gp0,BorderLayout.CENTER);
+
     }
+
 }
 
 class JMessageTable extends JTable {
@@ -262,8 +214,6 @@ class JMessageTable extends JTable {
 
 class JTreePanel extends JPanel {
 
-    public JTree tree;
-
     public JTreePanel(Endpoint endpoint, String message, IContract contract) {
         Set<Property> properties;
         if(message.equals("Request"))
@@ -274,12 +224,12 @@ class JTreePanel extends JPanel {
         setLayout(new BorderLayout());
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("root");
         createNodes(root, properties);
-        tree = new JTree(root);
-        tree.setDragEnabled(false);
-        expandAllNodes(tree, 0, tree.getRowCount());
-        tree.setRootVisible(false);
-        tree.setCellRenderer(new PropertyTreeRenderer());
-        JScrollPane s0 = new JScrollPane(tree);
+        JTree t0 = new JTree(root);
+        t0.setDragEnabled(false);
+        expandAllNodes(t0, 0, t0.getRowCount());
+        t0.setRootVisible(false);
+        t0.setCellRenderer(new PropertyTreeRenderer());
+        JScrollPane s0 = new JScrollPane(t0);
         add(s0,BorderLayout.CENTER);
     }
 

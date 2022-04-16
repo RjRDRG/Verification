@@ -4,27 +4,28 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class JViewerPanel<T extends JPanel> extends JPanel {
 
     private final Map<Integer, T> panels;
     private JPanel active;
-    private final int numberOfRows;
+    private final int numberOfColumns;
 
     private final JPanel empty;
 
-    public JViewerPanel(int numberOfRows) {
+    public JViewerPanel(int numberOfColumns) {
         setLayout(new BorderLayout());
         this.panels = new HashMap<>();
 
         this.empty = makeEmptyPanel();
         setActiveEmpty();
 
-        this.numberOfRows = numberOfRows;
+        this.numberOfColumns = numberOfColumns;
     }
 
     public int flattenCoordinates(int row, int column) {
-        return column + row*numberOfRows;
+        return column + row* numberOfColumns;
     }
 
     public void addPanel(int row, int column, T panel) {
@@ -37,6 +38,13 @@ public class JViewerPanel<T extends JPanel> extends JPanel {
             setActiveEmpty();
         }
         panels.remove(index);
+    }
+
+    public T getActive() {
+        if(Objects.equals(active,empty))
+            return null;
+        else
+            return (T) active;
     }
 
     public void setActive(int row, int column) {

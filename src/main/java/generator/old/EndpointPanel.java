@@ -1,24 +1,15 @@
-package generator;
+package generator.old;
 
-import generator.ui.JGridBagPanel;
-import generator.ui.JMultiTable;
+import generator.ui.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class EndpointPanel extends JPanel {
-
-    final JLabel la0;               final JLabel la1;
-    final JList<String> ls0;       final JList<String> ls1;
-    final JButton bt0;
-
-    final JMultiTable t0;
-
-    public JButton next;
 
     public EndpointPanel(
             String title0, final Map<String,Set<String>> elements0,
@@ -31,17 +22,11 @@ public class EndpointPanel extends JPanel {
 
         //--------------------------------------------------------------------------------------------------------------
 
-        la0 = new JLabel();
-        la1 = new JLabel();
+        final JLabel la0 = new JLabel();               final JLabel la1 = new JLabel();
+        final JList<String> ls0 = new JList<>();       final JList<String> ls1 = new JList<>();
+        final JButton bt0 = new JButton();
 
-        ls0 = new JList<>();
-        ls1 = new JList<>();
-
-        bt0 = new JButton();
-
-        t0 = new JMultiTable();
-
-        next = new JButton();
+        final JMultiTable t0 = new JMultiTable();
 
         //--------------------------------------------------------------------------------------------------------------
 
@@ -139,8 +124,11 @@ public class EndpointPanel extends JPanel {
 
         gp0.load(0,3, s2).setTopPad(10).setWidth(2).add();
 
-        next.setText("Next");
+        JButton next = new JButton("Next");
         next.setFocusable(false);
+        next.addActionListener(e ->
+            new SinglePanelFrame("Contract Evolution Constructor", new MessagePanel(t0.getValues(),t0.getColumnNames()),new Dimension(1000, 1000),20)
+        );
 
         gp0.load(1,4, next).removeScaleY().removeScaleX().setAnchorRight().setTopPad(5).add();
 
@@ -175,9 +163,5 @@ public class EndpointPanel extends JPanel {
                 columnsWithOptions.add(i);
         }
         table.addRow(row, responseOptions, columnsWithOptions);
-    }
-
-    public MessagePanel getNextPanel() {
-        return new MessagePanel(t0.getValues(), t0.getColumnNames());
     }
 }
