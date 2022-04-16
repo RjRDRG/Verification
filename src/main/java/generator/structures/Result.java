@@ -10,19 +10,11 @@ public class Result {
         methods = new LinkedList<>();
     }
 
-    public List<Method> getEndpoints() {
-        return methods;
-    }
-
-    public void addEndpoint(Method method) {
+    public void addMethod(Method method) {
         this.methods.add(method);
     }
 
     public List<Method> getMethods() {
         return methods;
-    }
-
-    public void setMethods(List<Method> methods) {
-        this.methods = methods;
     }
 }

@@ -4,9 +4,11 @@ import contract.IContract;
 import contract.structures.Endpoint;
 import generator.ui.JGridBagPanel;
 import generator.ui.JViewerPanel;
+import generator.utils.ResultIO;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -37,7 +39,11 @@ public class EditorFrame extends JFrame {
                 revalidate();
             });
             resolutionPanel.submit.addActionListener(e1 -> {
-                //TODO
+                try {
+                    ResultIO.output(resolutionPanel.getResult());
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
                 System.exit(1);
             });
             getContentPane().remove(endpointPanel);

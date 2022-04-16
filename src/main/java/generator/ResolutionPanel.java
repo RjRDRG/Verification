@@ -3,6 +3,10 @@ package generator;
 import contract.structures.Endpoint;
 import contract.structures.Property;
 import contract.structures.PropertyKey;
+import generator.structures.Message;
+import generator.structures.Method;
+import generator.structures.Parameter;
+import generator.structures.Result;
 import generator.ui.*;
 import resolution.structures.Resolution;
 
@@ -17,6 +21,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.*;
+import java.util.List;
 
 public class ResolutionPanel extends JPanel {
 
@@ -39,7 +44,7 @@ public class ResolutionPanel extends JPanel {
         l0 = new JLabel();
         t0 = new JMessageTable(messagePairs, messagesHeader);
 
-        v0 = new JViewerPanel<>(t0.getColumnCount()-2, "EMPTY");
+        v0 = new JViewerPanel<>(t0.getColumnCount()-2, messagePairs.length, "EMPTY");
 
         back = new JButton();
         submit = new JButton();
@@ -112,7 +117,29 @@ public class ResolutionPanel extends JPanel {
         add(gp0,BorderLayout.CENTER);
     }
 
+    public Result getResult() {
+        Result result = new Result();
 
+        for(int i=0; i<v0.getNumberOfRows(); i++) {
+            Method method = new Method(Endpoint.fromString((String) t0.getValueAt(i,0)), Endpoint.fromString((String) t0.getValueAt(i,1)));
+            for (int j=0; j<v0.getNumberOfColumns(); j++) {
+                JMessagePanel messagePanel = v0.getPanel(i,j);
+                if(messagePanel != null) {
+                    List<Parameter> parameters = new ArrayList<>();
+                    for (Object[] row : messagePanel.t2.getValues()) {
+                        parameters.add(new Parameter(
+                                ((Property)row[0]).key.toString(),((Resolution)row[1]).toString()
+                        ));
+                    }
+                    Message message = new Message(t0.getColumnName(j+2), (String) t0.getValueAt(i,j+2), parameters);
+                    method.addMessage(message);
+                }
+            }
+            result.addMethod(method);
+        }
+
+        return result;
+    }
 }
 
 class JMessagePanel extends JPanel {
@@ -145,7 +172,7 @@ class JMessagePanel extends JPanel {
 
         la = new JLabel();
         p0 = new JPropertyPanel();
-        v0 = new JViewerPanel<>(2);
+        v0 = new JViewerPanel<>(2,1);
         b0 = new JButton();
 
         l0 = new JLabel();
@@ -633,7 +660,7 @@ class JSimpleTable extends JTable {
     }
 
     public Object[][] getValues() {
-        Object[][] values = new String[model.getRowCount()][model.getColumnCount()-1];
+        Object[][] values = new Object[model.getRowCount()][model.getColumnCount()-1];
         for(int i=0; i<model.getRowCount(); i++) {
             values[i][0] = getValueAt(i,0);
             values[i][1] = getValueAt(i,1);

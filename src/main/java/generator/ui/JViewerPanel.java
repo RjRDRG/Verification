@@ -11,10 +11,11 @@ public class JViewerPanel<T extends JPanel> extends JPanel {
     private final Map<Integer, T> panels;
     private JPanel active;
     private final int numberOfColumns;
+    private final int numberOfRows;
 
     private final JPanel empty;
 
-    public JViewerPanel(int numberOfColumns, String emptyMessage) {
+    public JViewerPanel(int numberOfColumns, int numberOfRows, String emptyMessage) {
         setLayout(new BorderLayout());
         this.panels = new HashMap<>();
 
@@ -22,10 +23,11 @@ public class JViewerPanel<T extends JPanel> extends JPanel {
         setActiveEmpty();
 
         this.numberOfColumns = numberOfColumns;
+        this.numberOfRows = numberOfRows;
     }
 
-    public JViewerPanel(int numberOfColumns) {
-        this(numberOfColumns,"");
+    public JViewerPanel(int numberOfColumns, int numberOfRows) {
+        this(numberOfColumns,numberOfRows, "");
     }
 
     public int flattenCoordinates(int row, int column) {
@@ -73,6 +75,18 @@ public class JViewerPanel<T extends JPanel> extends JPanel {
         this.active = empty;
         repaint();
         revalidate();
+    }
+
+    public int getNumberOfColumns() {
+        return numberOfColumns;
+    }
+
+    public int getNumberOfRows() {
+        return numberOfRows;
+    }
+
+    public T getPanel(int row, int column) {
+        return panels.get(flattenCoordinates(row,column));
     }
 
     private JPanel makeEmptyPanel(String message) {

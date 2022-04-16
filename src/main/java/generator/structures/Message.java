@@ -11,7 +11,7 @@ public class Message {
     public String priorType;
     public List<Parameter> parameters;
 
-    private Message(String type, String priorType, List<Parameter> parameters) {
+    public Message(String type, String priorType, List<Parameter> parameters) {
         this.type = type;
         this.priorType = priorType;
         this.parameters = parameters;
