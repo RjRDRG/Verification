@@ -4,12 +4,12 @@ import contract.IContract;
 import contract.structures.Endpoint;
 import contract.structures.Property;
 import contract.structures.PropertyKey;
-import generator.ui.JContextButton;
 import generator.ui.JGridBagPanel;
 import generator.ui.JViewerPanel;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -124,7 +124,7 @@ class JMessagePanel extends JPanel {
     final JLabel l2;
     final JTable t2;
 
-    final JContextButton b0;
+    final JButton b0;
 
     public JMessagePanel(JTreePanel treePanel, JTreePanel treePanel1) {
         setLayout(new BorderLayout());
@@ -146,21 +146,52 @@ class JMessagePanel extends JPanel {
         l2 = new JLabel();
         t2 = new JTable();
 
-        b0 = new JContextButton();
+        b0 = new JButton();
 
         //--------------------------------------------------------------------------------------------------------------
 
         l0.setText("Properties: ");
         gpa.load(0,0, l0).removeScaleY().add();
 
-        t0.tree.addTreeSelectionListener(e -> {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) t0.tree.getLastSelectedPathComponent();
-            if(node != null && node.getUserObject() instanceof Property) {
-                p0.viewProperty((Property) node.getUserObject());
-            } else {
+        TreeSelectionListener selectionListener = e -> {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) t1.tree.getLastSelectedPathComponent();
+
+            Property t0Selected = (Property) Optional.ofNullable(t0.tree.getLastSelectedPathComponent()).map(p -> ((DefaultMutableTreeNode) p).getUserObject()).filter(p0 -> p0 instanceof Property).orElse(null);
+            Property t1Selected = (Property) Optional.ofNullable(t1.tree.getLastSelectedPathComponent()).map(p -> ((DefaultMutableTreeNode) p).getUserObject()).filter(p0 -> p0 instanceof Property).orElse(null);
+
+            if(t0Selected == null)
                 p0.resetView();
+            else
+                p0.viewProperty(t0Selected);
+
+            if(t1Selected == null)
+                p1.resetView();
+            else
+                p1.viewProperty(t1Selected);
+
+            if(t0Selected == null && t1Selected == null) {
+                b0.setText("Default Value");
+                b0.setEnabled(false);
             }
-        });
+            else if(t0Selected != null && t1Selected == null) {
+                b0.setText("Default Value");
+                b0.setEnabled(true);
+                return;
+            }
+            else if(t0Selected == null) {
+                b0.setText("Link");
+                b0.setEnabled(false);
+                return;
+            }
+            else {
+                b0.setText("Link");
+                b0.setEnabled(true);
+            }
+            b0.revalidate();
+            b0.repaint();
+        };
+
+        t0.tree.addTreeSelectionListener(selectionListener);
         t0.tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         gpa.load(0,1, t0).add();
 
@@ -172,14 +203,8 @@ class JMessagePanel extends JPanel {
 
         gpb.load(0,0, l1).removeScaleY().add();
 
-        t1.tree.addTreeSelectionListener(e -> {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) t1.tree.getLastSelectedPathComponent();
-            if(node != null && node.getUserObject() instanceof Property) {
-                p1.viewProperty((Property) node.getUserObject());
-            } else {
-                p1.resetView();
-            }
-        });
+        t1.tree.addTreeSelectionListener(selectionListener);
+        t1.tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         gpb.load(0,1, t1).add();
 
         gpb.load(0,2, p1).removeScaleY().setTopPad(5).add();
@@ -193,7 +218,8 @@ class JMessagePanel extends JPanel {
 
         //--------------------------------------------------------------------------------------------------------------
 
-        b0.addContext("Default Value", "Link");
+        b0.setText("Default Value");
+        b0.setEnabled(false);
 
         //--------------------------------------------------------------------------------------------------------------
         Dimension d0 = gpa.getPreferredSize();
