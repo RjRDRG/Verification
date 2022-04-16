@@ -19,7 +19,7 @@ public class EditorFrame extends JFrame {
 
     JViewerPanel v0;
     EndpointPanel endpointPanel;
-    MessagePanel messagePanel;
+    ResolutionPanel resolutionPanel;
 
     public EditorFrame(IContract contract, IContract priorContract) {
         super();
@@ -29,19 +29,19 @@ public class EditorFrame extends JFrame {
 
         endpointPanel = getEndpointPanel(contract,priorContract);
         endpointPanel.next.addActionListener(e0 -> {
-            messagePanel = endpointPanel.getNextPanel();
-            messagePanel.back.addActionListener(e1 -> {
-                getContentPane().remove(messagePanel);
+            resolutionPanel = endpointPanel.getNextPanel();
+            resolutionPanel.back.addActionListener(e1 -> {
+                getContentPane().remove(resolutionPanel);
                 getContentPane().add(endpointPanel, BorderLayout.CENTER);
                 repaint();
                 revalidate();
             });
-            messagePanel.submit.addActionListener(e1 -> {
+            resolutionPanel.submit.addActionListener(e1 -> {
                 //TODO
                 System.exit(1);
             });
             getContentPane().remove(endpointPanel);
-            getContentPane().add(messagePanel, BorderLayout.CENTER);
+            getContentPane().add(resolutionPanel, BorderLayout.CENTER);
             repaint();
             revalidate();
         });

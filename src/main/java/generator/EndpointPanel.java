@@ -177,7 +177,7 @@ public class EndpointPanel extends JPanel {
         table.addRow(row, responseOptions, columnsWithOptions);
     }
 
-    public MessagePanel getNextPanel() {
-        return new MessagePanel(t0.getValues(), t0.getColumnNames());
+    public ResolutionPanel getNextPanel() {
+        return new ResolutionPanel(t0.getValues(), t0.getColumnNames());
     }
 }

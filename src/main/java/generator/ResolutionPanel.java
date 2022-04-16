@@ -4,7 +4,7 @@ import contract.IContract;
 import contract.structures.Endpoint;
 import contract.structures.Property;
 import contract.structures.PropertyKey;
-import generator.old.MainFrame;
+import generator.ui.JContextButton;
 import generator.ui.JGridBagPanel;
 import generator.ui.JViewerPanel;
 
@@ -13,12 +13,11 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.*;
 import java.awt.*;
 import java.util.*;
 
-public class MessagePanel extends JPanel {
+public class ResolutionPanel extends JPanel {
 
     final JGridBagPanel gp0;
 
@@ -30,7 +29,7 @@ public class MessagePanel extends JPanel {
     public final JButton back;
     public final JButton submit;
 
-    public MessagePanel(String[][] data, String[] dataHeader) {
+    public ResolutionPanel(String[][] data, String[] dataHeader) {
         setLayout(new BorderLayout());
         gp0 = new JGridBagPanel();
 
@@ -84,7 +83,10 @@ public class MessagePanel extends JPanel {
                     String priorMessage = (String) t0.getValueAt(j,i);
                     v0.addPanel(
                             j, i - 2,
-                            new JMessagePanel(new JTreePanel(endpoint, message, EditorFrame.CONTRACT), new JTreePanel(priorEndpoint, priorMessage, EditorFrame.PRIOR_CONTRACT))
+                            new JMessagePanel(
+                                    new JTreePanel(endpoint, message, EditorFrame.CONTRACT),
+                                    new JTreePanel(priorEndpoint, priorMessage, EditorFrame.PRIOR_CONTRACT)
+                            )
                     );
                 }
             }
@@ -122,6 +124,8 @@ class JMessagePanel extends JPanel {
     final JLabel l2;
     final JTable t2;
 
+    final JContextButton b0;
+
     public JMessagePanel(JTreePanel treePanel, JTreePanel treePanel1) {
         setLayout(new BorderLayout());
         gp0 = new JGridBagPanel();
@@ -142,6 +146,8 @@ class JMessagePanel extends JPanel {
         l2 = new JLabel();
         t2 = new JTable();
 
+        b0 = new JContextButton();
+
         //--------------------------------------------------------------------------------------------------------------
 
         l0.setText("Properties: ");
@@ -149,11 +155,13 @@ class JMessagePanel extends JPanel {
 
         t0.tree.addTreeSelectionListener(e -> {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) t0.tree.getLastSelectedPathComponent();
-            Object nodeInfo = node.getUserObject();
-            if(nodeInfo instanceof Property) {
-                p0.viewProperty((Property) nodeInfo);
+            if(node != null && node.getUserObject() instanceof Property) {
+                p0.viewProperty((Property) node.getUserObject());
+            } else {
+                p0.resetView();
             }
         });
+        t0.tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         gpa.load(0,1, t0).add();
 
         gpa.load(0,2, p0).removeScaleY().setTopPad(5).add();
@@ -166,9 +174,10 @@ class JMessagePanel extends JPanel {
 
         t1.tree.addTreeSelectionListener(e -> {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) t1.tree.getLastSelectedPathComponent();
-            Object nodeInfo = node.getUserObject();
-            if(nodeInfo instanceof Property) {
-                p1.viewProperty((Property) nodeInfo);
+            if(node != null && node.getUserObject() instanceof Property) {
+                p1.viewProperty((Property) node.getUserObject());
+            } else {
+                p1.resetView();
             }
         });
         gpb.load(0,1, t1).add();
@@ -184,20 +193,25 @@ class JMessagePanel extends JPanel {
 
         //--------------------------------------------------------------------------------------------------------------
 
+        b0.addContext("Default Value", "Link");
+
+        //--------------------------------------------------------------------------------------------------------------
         Dimension d0 = gpa.getPreferredSize();
         d0.width = 180;
         gpa.setPreferredSize(d0);
-        gp0.load(0,1, gpa).setWeight(0.3f,1).add();
+        gp0.load(0,0, gpa).setWeight(0.3f,1).add();
 
         Dimension d1 = gpb.getPreferredSize();
         d1.width = 180;
         gpb.setPreferredSize(d1);
-        gp0.load(1,1, gpb).setWeight(0.3f,1).setLeftPad(10).add();
+        gp0.load(1,0, gpb).setWeight(0.3f,1).setLeftPad(10).add();
 
         Dimension d2 = gpc.getPreferredSize();
         d2.width = 240;
         gpc.setPreferredSize(d2);
-        gp0.load(2,1, gpc).setWeight(0.4f,1).setLeftPad(20).add();
+        gp0.load(2,0, gpc).setWeight(0.4f,1).setLeftPad(20).add();
+
+        gp0.load(0,1, b0).removeScaleY().setWidth(2).add();
 
         add(gp0,BorderLayout.CENTER);
     }
@@ -278,7 +292,31 @@ class JTreePanel extends JPanel {
         tree.setDragEnabled(false);
         expandAllNodes(tree, 0, tree.getRowCount());
         tree.setRootVisible(false);
-        tree.setCellRenderer(new PropertyTreeRenderer());
+        tree.setCellRenderer(new DefaultTreeCellRenderer() {
+            @Override
+            public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded,
+                                                          boolean leaf, int row, boolean hasFocus) {
+                super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+                Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
+                if (userObject instanceof Property) {
+                    this.setText(((Property) userObject).key.name);
+                } else {
+                    this.setText((String) userObject);
+                }
+                return this;
+            }
+        });
+        tree.setSelectionModel(new DefaultTreeSelectionModel() {
+            @Override
+            public void setSelectionPath(TreePath path) {
+                if(tree.isPathSelected(path)) {
+                    tree.removeSelectionPath(path);
+                }
+                else {
+                    super.setSelectionPath(path);
+                }
+            }
+        });
         JScrollPane s0 = new JScrollPane(tree);
         add(s0,BorderLayout.CENTER);
     }
@@ -338,24 +376,6 @@ class JTreePanel extends JPanel {
     }
 }
 
-class PropertyTreeRenderer extends DefaultTreeCellRenderer {
-
-    public PropertyTreeRenderer() {}
-
-    @Override
-    public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded,
-                                                  boolean leaf, int row, boolean hasFocus) {
-        super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-        Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
-        if (userObject instanceof Property) {
-            this.setText(((Property) userObject).key.name);
-        } else {
-            this.setText((String) userObject);
-        }
-        return this;
-    }
-}
-
 class JPropertyPanel extends JPanel {
 
     JTextField name;
@@ -405,6 +425,14 @@ class JPropertyPanel extends JPanel {
         isArray.setSelected(property.array);
         primitive.setText(property.primitive);
         format.setText(property.format);
+        format.setEnabled(false);
+    }
+
+    public void resetView() {
+        name.setText("");
+        isArray.setSelected(false);
+        primitive.setText("");
+        format.setText("");
         format.setEnabled(false);
     }
 }
