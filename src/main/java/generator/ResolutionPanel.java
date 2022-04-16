@@ -1,6 +1,5 @@
 package generator;
 
-import contract.IContract;
 import contract.structures.Endpoint;
 import contract.structures.Property;
 import contract.structures.PropertyKey;
@@ -31,14 +30,14 @@ public class ResolutionPanel extends JPanel {
     public final JButton back;
     public final JButton submit;
 
-    public ResolutionPanel(String[][] data, String[] dataHeader) {
+    public ResolutionPanel(String[][] messagePairs, String[] messagesHeader) {
         setLayout(new BorderLayout());
         gp0 = new JGridBagPanel();
 
         //--------------------------------------------------------------------------------------------------------------
 
         l0 = new JLabel();
-        t0 = new JMessageTable(data, dataHeader);
+        t0 = new JMessageTable(messagePairs, messagesHeader);
 
         v0 = new JViewerPanel<>(t0.getColumnCount()-2, "EMPTY");
 
@@ -83,13 +82,19 @@ public class ResolutionPanel extends JPanel {
                 if(t0.getValueAt(j, i) != null) {
                     String message = t0.getColumnName(i).replace("Response : ","");
                     String priorMessage = (String) t0.getValueAt(j,i);
-                    v0.addPanel(
-                            j, i - 2,
-                            new JMessagePanel(
-                                    new JTreePanel(endpoint, message, true, EditorFrame.CONTRACT),
-                                    new JTreePanel(priorEndpoint, priorMessage, false, EditorFrame.PRIOR_CONTRACT)
-                            )
-                    );
+
+                    Set<Property> properties;
+                    Set<Property> priorProperties;
+                    if(message.equals("Request")) {
+                        properties = EditorFrame.CONTRACT.getRequestProperties(endpoint);
+                        priorProperties = EditorFrame.PRIOR_CONTRACT.getRequestProperties(priorEndpoint);
+                    }
+                    else {
+                        properties = EditorFrame.CONTRACT.getResponseProperties(endpoint, message);
+                        priorProperties = EditorFrame.PRIOR_CONTRACT.getResponseProperties(priorEndpoint, priorMessage);
+                    }
+
+                    v0.addPanel(j, i - 2, new JMessagePanel(properties, priorProperties));
                 }
             }
         }
@@ -129,13 +134,13 @@ class JMessagePanel extends JPanel {
     final JLabel l3;
     final JSimpleTable t2;
 
-    public JMessagePanel(JTreePanel treePanel, JTreePanel treePanel1) {
+    public JMessagePanel(Set<Property> properties, Set<Property> priorProperties) {
         setLayout(new BorderLayout());
         gp0 = new JGridBagPanel();
 
         //--------------------------------------------------------------------------------------------------------------
 
-        gpa = new JGridBagPanel();
+        gpa = new JGridBagPanel(false);
 
         la = new JLabel();
         p0 = new JPropertyPanel();
@@ -143,10 +148,10 @@ class JMessagePanel extends JPanel {
         b0 = new JButton();
 
         l0 = new JLabel();
-        t0 = treePanel;
+        t0 = new JTreePanel(properties, true);
 
         l1 = new JLabel();
-        t1 = treePanel1;
+        t1 = new JTreePanel(priorProperties, false);
 
         gpb = new JGridBagPanel(false);
         l3 = new JLabel();
@@ -274,6 +279,14 @@ class JMessagePanel extends JPanel {
         };
 
         t2.buildTable(new String[]{"Property", "Resolution", ""}, removeRow);
+        properties.stream().filter(priorProperties::contains).forEach(p -> {
+            p.setSolved(true);
+            Resolution resolution = Resolution.linkResolution(p.key);
+            t2.addRow(new Object[]{p, resolution, "X"});
+        });
+        t0.revalidate();
+        t0.repaint();
+
         JScrollPane s0 = new JScrollPane(t2);
         gpb.load(0,1, s0).add();
 
@@ -355,13 +368,7 @@ class JTreePanel extends JPanel {
 
     public JTree tree;
 
-    public JTreePanel(Endpoint endpoint, String message, boolean colorNodes, IContract contract) {
-        Set<Property> properties;
-        if(message.equals("Request"))
-            properties = contract.getRequestProperties(endpoint);
-        else
-            properties = contract.getResponseProperties(endpoint, message);
-
+    public JTreePanel(Set<Property> properties, boolean colorNodes) {
         setLayout(new BorderLayout());
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("root");
         createNodes(root, properties);
