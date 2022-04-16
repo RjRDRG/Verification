@@ -80,7 +80,7 @@ public class JViewerPanel<T extends JPanel> extends JPanel {
         empty.setBorder(BorderFactory.createLineBorder(new Color(97, 99, 101)));
         empty.setLayout(new GridBagLayout());
         JLabel label = new JLabel(message);
-        label.setForeground(new Color(101, 106, 109));
+        label.setForeground(new Color(101, 106, 109, 101));
         Font font = label.getFont();
         label.setFont(new Font(font.getName(), Font.BOLD, 20));
         empty.add(label);

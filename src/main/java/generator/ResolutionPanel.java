@@ -5,6 +5,7 @@ import contract.structures.Endpoint;
 import contract.structures.Property;
 import contract.structures.PropertyKey;
 import generator.ui.JGridBagPanel;
+import generator.ui.JMultiTable;
 import generator.ui.JViewerPanel;
 
 import javax.swing.*;
@@ -15,6 +16,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.*;
 
 public class ResolutionPanel extends JPanel {
@@ -38,7 +40,7 @@ public class ResolutionPanel extends JPanel {
         l0 = new JLabel();
         t0 = new JMessageTable(data, dataHeader);
 
-        v0 = new JViewerPanel<>(t0.getColumnCount()-2);
+        v0 = new JViewerPanel<>(t0.getColumnCount()-2, "EMPTY");
 
         back = new JButton();
         submit = new JButton();
@@ -84,8 +86,8 @@ public class ResolutionPanel extends JPanel {
                     v0.addPanel(
                             j, i - 2,
                             new JMessagePanel(
-                                    new JTreePanel(endpoint, message, EditorFrame.CONTRACT),
-                                    new JTreePanel(priorEndpoint, priorMessage, EditorFrame.PRIOR_CONTRACT)
+                                    new JTreePanel(endpoint, message, true, EditorFrame.CONTRACT),
+                                    new JTreePanel(priorEndpoint, priorMessage, false, EditorFrame.PRIOR_CONTRACT)
                             )
                     );
                 }
@@ -125,7 +127,7 @@ class JMessagePanel extends JPanel {
 
     final JGridBagPanel gpb;
     final JLabel l3;
-    final JTable t2;
+    final JMultiTable t2;
 
     public JMessagePanel(JTreePanel treePanel, JTreePanel treePanel1) {
         setLayout(new BorderLayout());
@@ -148,7 +150,7 @@ class JMessagePanel extends JPanel {
 
         gpb = new JGridBagPanel(false);
         l3 = new JLabel();
-        t2 = new JTable();
+        t2 = new JMultiTable();
 
         //--------------------------------------------------------------------------------------------------------------
 
@@ -207,6 +209,10 @@ class JMessagePanel extends JPanel {
         v0.setPreferredSize(p0.getPreferredSize());
         gpa.load(1,1, v0).setWeight(0.5f,1).removeScaleY().add();
 
+        //--------------------------------------------------------------------------------------------------------------
+
+        b0.setText("Use Value");
+        b0.setEnabled(false);
         gpa.load(0,2, b0).removeScaleY().setWidth(2).add();
 
         //--------------------------------------------------------------------------------------------------------------
@@ -230,14 +236,20 @@ class JMessagePanel extends JPanel {
         //--------------------------------------------------------------------------------------------------------------
 
         l3.setText("Resolutions");
-
         gpb.load(0,0, l3).removeScaleY().add();
+
+        Action removeRow = new AbstractAction()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                int row = Integer.parseInt(e.getActionCommand());
+                Property property = (Property) t2.getModel().getValueAt(row,0);
+                property.setSolved(false);
+            }
+        };
+
+        t2.buildTable(new String[]{"Property", "Resolution"},Set.of(1),removeRow);
         gpb.load(0,1, t2).add();
-
-        //--------------------------------------------------------------------------------------------------------------
-
-        b0.setText("Use Value");
-        b0.setEnabled(false);
 
         //--------------------------------------------------------------------------------------------------------------
         gp0.load(0,0, gpa).setWeight(0.6f,1).add();
@@ -309,7 +321,7 @@ class JTreePanel extends JPanel {
 
     public JTree tree;
 
-    public JTreePanel(Endpoint endpoint, String message, IContract contract) {
+    public JTreePanel(Endpoint endpoint, String message, boolean colorNodes, IContract contract) {
         Set<Property> properties;
         if(message.equals("Request"))
             properties = contract.getRequestProperties(endpoint);
@@ -330,7 +342,15 @@ class JTreePanel extends JPanel {
                 super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
                 Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
                 if (userObject instanceof Property) {
+                    Property property = (Property) userObject;
                     this.setText(((Property) userObject).key.name);
+                    if(colorNodes) {
+                        if(property.solved) {
+                            this.setForeground(new Color(73, 156, 84));
+                        }else {
+                            this.setForeground(new Color(199, 84, 80));
+                        }
+                    }
                 } else {
                     this.setText((String) userObject);
                 }
