@@ -4,9 +4,8 @@ import contract.IContract;
 import contract.structures.Endpoint;
 import contract.structures.Property;
 import contract.structures.PropertyKey;
-import generator.ui.JGridBagPanel;
-import generator.ui.JMultiTable;
-import generator.ui.JViewerPanel;
+import generator.ui.*;
+import resolution.structures.Resolution;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
@@ -17,6 +16,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.util.*;
 
 public class ResolutionPanel extends JPanel {
@@ -127,7 +127,7 @@ class JMessagePanel extends JPanel {
 
     final JGridBagPanel gpb;
     final JLabel l3;
-    final JMultiTable t2;
+    final JSimpleTable t2;
 
     public JMessagePanel(JTreePanel treePanel, JTreePanel treePanel1) {
         setLayout(new BorderLayout());
@@ -150,7 +150,7 @@ class JMessagePanel extends JPanel {
 
         gpb = new JGridBagPanel(false);
         l3 = new JLabel();
-        t2 = new JMultiTable();
+        t2 = new JSimpleTable();
 
         //--------------------------------------------------------------------------------------------------------------
 
@@ -213,6 +213,29 @@ class JMessagePanel extends JPanel {
 
         b0.setText("Use Value");
         b0.setEnabled(false);
+
+        b0.addActionListener(e -> {
+            Property t0Selected = (Property) Optional.ofNullable(t0.tree.getLastSelectedPathComponent()).map(p -> ((DefaultMutableTreeNode) p).getUserObject()).filter(p0 -> p0 instanceof Property).orElse(null);
+            Property t1Selected = (Property) Optional.ofNullable(t1.tree.getLastSelectedPathComponent()).map(p -> ((DefaultMutableTreeNode) p).getUserObject()).filter(p0 -> p0 instanceof Property).orElse(null);
+            Resolution resolution;
+
+            if(t0Selected.solved)
+                return;
+
+            if(t1Selected == null) {
+                resolution = Resolution.valueResolution(((JValuePanel)v0.getActive()).value.getText());
+            }
+            else {
+                resolution = Resolution.linkResolution(t1Selected.key);
+            }
+
+            t2.addRow(new Object[]{t0Selected, resolution, "X"});
+
+            t0Selected.setSolved(true);
+            t0.revalidate();
+            t0.repaint();
+        });
+
         gpa.load(0,2, b0).removeScaleY().setWidth(2).add();
 
         //--------------------------------------------------------------------------------------------------------------
@@ -245,11 +268,14 @@ class JMessagePanel extends JPanel {
                 int row = Integer.parseInt(e.getActionCommand());
                 Property property = (Property) t2.getModel().getValueAt(row,0);
                 property.setSolved(false);
+                t0.revalidate();
+                t0.repaint();
             }
         };
 
-        t2.buildTable(new String[]{"Property", "Resolution"},Set.of(1),removeRow);
-        gpb.load(0,1, t2).add();
+        t2.buildTable(new String[]{"Property", "Resolution", ""}, removeRow);
+        JScrollPane s0 = new JScrollPane(t2);
+        gpb.load(0,1, s0).add();
 
         //--------------------------------------------------------------------------------------------------------------
         gp0.load(0,0, gpa).setWeight(0.6f,1).add();
@@ -257,6 +283,14 @@ class JMessagePanel extends JPanel {
         gp0.load(1,0, gpb).setWeight(0.4f,1).setLeftPad(20).add();
 
         add(gp0,BorderLayout.CENTER);
+    }
+
+    private void buildRow(JSimpleTable table, Property property, Resolution resolution) {
+        Object[] row = new Object[3];
+        row[0] = property;
+        row[1] = resolution;
+        row[2] = "X";
+        table.addRow(row);
     }
 }
 
@@ -510,5 +544,89 @@ class JPropertyPanel extends JPanel {
         isArray.setSelected(false);
         primitive.setText("");
         format.setText("");
+    }
+}
+
+class JSimpleTable extends JTable {
+
+    private final DefaultTableModel model;
+
+    private final DefaultTableCellRenderer propertyColumnCellRenderer;
+    private final DefaultTableCellRenderer resolutionColumnCellRenderer;
+
+    public JSimpleTable() {
+        super();
+        model = new DefaultTableModel();
+
+        propertyColumnCellRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+                l.setText(((Property)value).key.toString());
+                return l;
+            }
+        };
+        resolutionColumnCellRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+                l.setText(((Resolution)value).resolution);
+                return l;
+            }
+        };
+    }
+
+    @Override
+    public boolean isCellEditable(int row, int column) {
+        return column == model.getColumnCount()-1;
+    }
+
+    @Override
+    public TableCellRenderer getCellRenderer(int row, int column) {
+        if(column == 0) {
+            return propertyColumnCellRenderer;
+        }
+        else if(column == 1) {
+            return resolutionColumnCellRenderer;
+        }
+        return super.getCellRenderer(row,column);
+    }
+
+    public void buildTable(String[] columnNames, Action additionalRemoveRowAction) {
+        model.setColumnIdentifiers(columnNames);
+        setModel(model);
+
+        getTableHeader().setReorderingAllowed(false);
+        getTableHeader().setResizingAllowed(false);
+        setCellSelectionEnabled(false);
+        setFocusable(false);
+        setShowGrid(false);
+
+        Action removeRow = new AbstractAction()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                int modelRow = Integer.parseInt( e.getActionCommand() );
+                model.removeRow(modelRow);
+            }
+        };
+
+        ButtonColumn buttonColumn = new ButtonColumn(this, model.getColumnCount()-1, new Color(199, 84, 80), additionalRemoveRowAction, removeRow);
+        buttonColumn.setMnemonic(KeyEvent.VK_D);
+        getColumnModel().getColumn( model.getColumnCount()-1).setMaxWidth(30);
+        getColumnModel().getColumn( model.getColumnCount()-1).setMinWidth(30);
+    }
+
+    public void addRow(Object[] row) {
+        model.addRow(row);
+    }
+
+    public Object[][] getValues() {
+        Object[][] values = new String[model.getRowCount()][model.getColumnCount()-1];
+        for(int i=0; i<model.getRowCount(); i++) {
+            values[i][0] = getValueAt(i,0);
+            values[i][1] = getValueAt(i,1);
+        }
+        return values;
     }
 }
