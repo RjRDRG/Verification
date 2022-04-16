@@ -14,14 +14,18 @@ public class JViewerPanel<T extends JPanel> extends JPanel {
 
     private final JPanel empty;
 
-    public JViewerPanel(int numberOfColumns) {
+    public JViewerPanel(int numberOfColumns, String emptyMessage) {
         setLayout(new BorderLayout());
         this.panels = new HashMap<>();
 
-        this.empty = makeEmptyPanel();
+        this.empty = makeEmptyPanel(emptyMessage);
         setActiveEmpty();
 
         this.numberOfColumns = numberOfColumns;
+    }
+
+    public JViewerPanel(int numberOfColumns) {
+        this(numberOfColumns,"EMPTY");
     }
 
     public int flattenCoordinates(int row, int column) {
@@ -71,15 +75,12 @@ public class JViewerPanel<T extends JPanel> extends JPanel {
         revalidate();
     }
 
-    public void addSelectionListener() {
-    }
-
-    private JPanel makeEmptyPanel() {
+    private JPanel makeEmptyPanel(String message) {
         JPanel empty = new JPanel();
         empty.setBackground(new Color(70, 73, 75));
         empty.setBorder(BorderFactory.createLineBorder(new Color(97, 99, 101)));
         empty.setLayout(new GridBagLayout());
-        JLabel label = new JLabel("EMPTY");
+        JLabel label = new JLabel(message);
         label.setForeground(new Color(101, 106, 109));
         Font font = label.getFont();
         label.setFont(new Font(font.getName(), Font.BOLD, 20));

@@ -111,20 +111,21 @@ class JMessagePanel extends JPanel {
     final JGridBagPanel gp0;
 
     final JGridBagPanel gpa;
+
+    final JLabel la;
+    final JPropertyPanel p0;
+    final JViewerPanel<JPanel> v0;
+    final JButton b0;
+
     final JLabel l0;
     final JTreePanel t0;
-    final JPropertyPanel p0;
 
-    final JGridBagPanel gpb;
     final JLabel l1;
     final JTreePanel t1;
-    final JPropertyPanel p1;
 
-    final JGridBagPanel gpc;
-    final JLabel l2;
+    final JGridBagPanel gpb;
+    final JLabel l3;
     final JTable t2;
-
-    final JButton b0;
 
     public JMessagePanel(JTreePanel treePanel, JTreePanel treePanel1) {
         setLayout(new BorderLayout());
@@ -133,111 +134,121 @@ class JMessagePanel extends JPanel {
         //--------------------------------------------------------------------------------------------------------------
 
         gpa = new JGridBagPanel();
+
+        la = new JLabel();
+        p0 = new JPropertyPanel();
+        v0 = new JViewerPanel<>(2, "");
+        v0.setPreferredSize(p0.getPreferredSize());
+        b0 = new JButton();
+
         l0 = new JLabel();
         t0 = treePanel;
-        p0 = new JPropertyPanel();
 
-        gpb = new JGridBagPanel();
         l1 = new JLabel();
         t1 = treePanel1;
-        p1 = new JPropertyPanel();
 
-        gpc = new JGridBagPanel();
-        l2 = new JLabel();
+        gpb = new JGridBagPanel();
+        l3 = new JLabel();
         t2 = new JTable();
-
-        b0 = new JButton();
 
         //--------------------------------------------------------------------------------------------------------------
 
-        l0.setText("Properties: ");
-        gpa.load(0,0, l0).removeScaleY().add();
-
         TreeSelectionListener selectionListener = e -> {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) t1.tree.getLastSelectedPathComponent();
-
             Property t0Selected = (Property) Optional.ofNullable(t0.tree.getLastSelectedPathComponent()).map(p -> ((DefaultMutableTreeNode) p).getUserObject()).filter(p0 -> p0 instanceof Property).orElse(null);
             Property t1Selected = (Property) Optional.ofNullable(t1.tree.getLastSelectedPathComponent()).map(p -> ((DefaultMutableTreeNode) p).getUserObject()).filter(p0 -> p0 instanceof Property).orElse(null);
 
-            if(t0Selected == null)
-                p0.resetView();
-            else
-                p0.viewProperty(t0Selected);
-
-            if(t1Selected == null)
-                p1.resetView();
-            else
-                p1.viewProperty(t1Selected);
-
             if(t0Selected == null && t1Selected == null) {
-                b0.setText("Default Value");
+                p0.resetView();
+                v0.setActiveEmpty();
+
+                b0.setText("Use Value");
                 b0.setEnabled(false);
             }
             else if(t0Selected != null && t1Selected == null) {
-                b0.setText("Default Value");
+                p0.viewProperty(t0Selected);
+                v0.setActive(0,0);
+                ((JValuePanel)v0.getActive()).setValue(Optional.ofNullable(t0Selected).map(t->t.defaultValue).orElse(""));
+
+                b0.setText("Use Value");
                 b0.setEnabled(true);
                 return;
             }
             else if(t0Selected == null) {
-                b0.setText("Link");
+                p0.resetView();
+                v0.setActive(0,1);
+                ((JPropertyPanel)v0.getActive()).viewProperty(t1Selected);
+
+                b0.setText("Link Properties");
                 b0.setEnabled(false);
                 return;
             }
             else {
-                b0.setText("Link");
+                p0.viewProperty(t0Selected);
+                v0.setActive(0,1);
+                ((JPropertyPanel)v0.getActive()).viewProperty(t1Selected);
+
+                b0.setText("Link Properties");
                 b0.setEnabled(true);
             }
+
             b0.revalidate();
             b0.repaint();
         };
 
-        t0.tree.addTreeSelectionListener(selectionListener);
-        t0.tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        gpa.load(0,1, t0).add();
+        //--------------------------------------------------------------------------------------------------------------
 
-        gpa.load(0,2, p0).removeScaleY().setTopPad(5).add();
+        la.setText("Resolution Editor");
+        gpa.load(0,0, la).removeScaleY().setWidth(2).add();
+
+        gpa.load(0,1, p0).removeScaleY().add();
+
+        v0.addPanel(0,0, new JValuePanel());
+        v0.addPanel(0,1, new JPropertyPanel());
+
+        gpa.load(1,1, v0).removeScaleY().add();
+
+        gpa.load(0,2, b0).removeScaleY().setWidth(2).add();
 
         //--------------------------------------------------------------------------------------------------------------
 
-        l1.setText("Prior Properties: ");
+        l0.setText("Property Selector");
+        gpa.load(0,3, l0).removeScaleY().setTopPad(15).add();
 
-        gpb.load(0,0, l1).removeScaleY().add();
+        t0.tree.addTreeSelectionListener(selectionListener);
+        t0.tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        gpa.load(0,4, t0).add();
+
+        //--------------------------------------------------------------------------------------------------------------
+
+        l1.setText("Prior Properties Selector");
+        gpa.load(1,3, l1).removeScaleY().setTopPad(15).add();
 
         t1.tree.addTreeSelectionListener(selectionListener);
         t1.tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        gpb.load(0,1, t1).add();
-
-        gpb.load(0,2, p1).removeScaleY().setTopPad(5).add();
+        gpa.load(1,4, t1).add();
 
         //--------------------------------------------------------------------------------------------------------------
 
-        l2.setText("Resolutions");
+        l3.setText("Resolutions");
 
-        gpc.load(0,0, l2).removeScaleY().add();
-        gpc.load(0,1, t2).add();
+        gpb.load(0,0, l3).removeScaleY().add();
+        gpb.load(0,1, t2).add();
 
         //--------------------------------------------------------------------------------------------------------------
 
-        b0.setText("Default Value");
+        b0.setText("Use Value");
         b0.setEnabled(false);
 
         //--------------------------------------------------------------------------------------------------------------
         Dimension d0 = gpa.getPreferredSize();
-        d0.width = 180;
+        d0.width = 600;
         gpa.setPreferredSize(d0);
-        gp0.load(0,0, gpa).setWeight(0.3f,1).add();
+        gp0.load(0,0, gpa).setWeight(0.6f,1).add();
 
-        Dimension d1 = gpb.getPreferredSize();
-        d1.width = 180;
-        gpb.setPreferredSize(d1);
-        gp0.load(1,0, gpb).setWeight(0.3f,1).setLeftPad(10).add();
-
-        Dimension d2 = gpc.getPreferredSize();
-        d2.width = 240;
-        gpc.setPreferredSize(d2);
-        gp0.load(2,0, gpc).setWeight(0.4f,1).setLeftPad(20).add();
-
-        gp0.load(0,1, b0).removeScaleY().setWidth(2).add();
+        Dimension d2 = gpb.getPreferredSize();
+        d2.width = 400;
+        gpb.setPreferredSize(d2);
+        gp0.load(1,0, gpb).setWeight(0.4f,1).setLeftPad(20).add();
 
         add(gp0,BorderLayout.CENTER);
     }
@@ -335,6 +346,10 @@ class JTreePanel extends JPanel {
         tree.setSelectionModel(new DefaultTreeSelectionModel() {
             @Override
             public void setSelectionPath(TreePath path) {
+                if(Optional.ofNullable(path.getLastPathComponent()).map(p -> ((DefaultMutableTreeNode) p).getUserObject()).filter(p0 -> p0 instanceof Property).orElse(null) == null) {
+                    return;
+                }
+
                 if(tree.isPathSelected(path)) {
                     tree.removeSelectionPath(path);
                 }
@@ -402,6 +417,29 @@ class JTreePanel extends JPanel {
     }
 }
 
+class JValuePanel extends JPanel {
+
+    JTextField value;
+
+    public JValuePanel() {
+        setLayout(new BorderLayout());
+        JGridBagPanel gp0 = new JGridBagPanel();
+
+        JLabel valueLabel = new JLabel("Property Value: ");
+        value = new JTextField("");
+
+        gp0.load(0,0,valueLabel).removeScaleY().setTopPad(10).setBottomPad(10).setLeftPad(10).add();
+        gp0.load(1,0,value).removeScaleY().setTopPad(10).setBottomPad(10).setRightPad(10).add();
+
+        add(gp0,BorderLayout.PAGE_START);
+        setBorder(UIManager.getBorder("ScrollPane.border"));
+    }
+
+    public void setValue(String v) {
+        value.setText(v);
+    }
+}
+
 class JPropertyPanel extends JPanel {
 
     JTextField name;
@@ -413,12 +451,12 @@ class JPropertyPanel extends JPanel {
         setLayout(new BorderLayout());
         JGridBagPanel gp0 = new JGridBagPanel();
 
-        JLabel nameLabel = new JLabel("Name: ");
+        JLabel nameLabel = new JLabel("Property Name: ");
         name = new JTextField("");
         name.setEnabled(false);
 
-        gp0.load(0,0,nameLabel).setTopPad(5).setLeftPad(10).add();
-        gp0.load(1,0,name).setTopPad(5).setRightPad(10).add();
+        gp0.load(0,0,nameLabel).setTopPad(10).setLeftPad(10).add();
+        gp0.load(1,0,name).setTopPad(10).setRightPad(10).add();
 
         JLabel arrayLabel = new JLabel("Is Array: ");
         isArray = new JCheckBox("", false);
@@ -427,7 +465,7 @@ class JPropertyPanel extends JPanel {
         gp0.load(0,1,arrayLabel).setLeftPad(10).add();
         gp0.load(1,1,isArray).setRightPad(10).add();
 
-        JLabel primitiveLabel = new JLabel("Primitive Type: ");
+        JLabel primitiveLabel = new JLabel("Type: ");
         primitive = new JTextField("");
         primitive.setEnabled(false);
 
@@ -443,7 +481,7 @@ class JPropertyPanel extends JPanel {
 
         add(gp0,BorderLayout.CENTER);
 
-        setBorder(BorderFactory.createTitledBorder("Property view"));
+        setBorder(UIManager.getBorder("ScrollPane.border"));
     }
 
     public void viewProperty(Property property) {
@@ -451,7 +489,6 @@ class JPropertyPanel extends JPanel {
         isArray.setSelected(property.array);
         primitive.setText(property.primitive);
         format.setText(property.format);
-        format.setEnabled(false);
     }
 
     public void resetView() {
@@ -459,6 +496,5 @@ class JPropertyPanel extends JPanel {
         isArray.setSelected(false);
         primitive.setText("");
         format.setText("");
-        format.setEnabled(false);
     }
 }
