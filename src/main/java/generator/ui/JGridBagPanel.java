@@ -5,6 +5,8 @@ import java.awt.*;
 
 public class JGridBagPanel extends JPanel {
 
+    boolean usePreferredSize;
+
     private static class Item {
         Component component;
         int column;
@@ -35,8 +37,13 @@ public class JGridBagPanel extends JPanel {
 
     private Item item;
 
-    public JGridBagPanel() {
+    public JGridBagPanel(boolean usePreferredSize) {
         setLayout(new GridBagLayout());
+        this.usePreferredSize = usePreferredSize;
+    }
+
+    public JGridBagPanel() {
+        this(true);
     }
 
     public JGridBagPanel load(int column, int row, Component component) {
@@ -139,4 +146,12 @@ public class JGridBagPanel extends JPanel {
        item = null;
        return this;
    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        if(!usePreferredSize)
+            return new Dimension();
+        else
+            return super.getPreferredSize();
+    }
 }

@@ -137,8 +137,7 @@ class JMessagePanel extends JPanel {
 
         la = new JLabel();
         p0 = new JPropertyPanel();
-        v0 = new JViewerPanel<>(2, "");
-        v0.setPreferredSize(p0.getPreferredSize());
+        v0 = new JViewerPanel<>(2);
         b0 = new JButton();
 
         l0 = new JLabel();
@@ -147,7 +146,7 @@ class JMessagePanel extends JPanel {
         l1 = new JLabel();
         t1 = treePanel1;
 
-        gpb = new JGridBagPanel();
+        gpb = new JGridBagPanel(false);
         l3 = new JLabel();
         t2 = new JTable();
 
@@ -200,12 +199,13 @@ class JMessagePanel extends JPanel {
         la.setText("Resolution Editor");
         gpa.load(0,0, la).removeScaleY().setWidth(2).add();
 
-        gpa.load(0,1, p0).removeScaleY().add();
+        gpa.load(0,1, p0).setWeight(0.5f,1).removeScaleY().add();
 
         v0.addPanel(0,0, new JValuePanel());
         v0.addPanel(0,1, new JPropertyPanel());
 
-        gpa.load(1,1, v0).removeScaleY().add();
+        v0.setPreferredSize(p0.getPreferredSize());
+        gpa.load(1,1, v0).setWeight(0.5f,1).removeScaleY().add();
 
         gpa.load(0,2, b0).removeScaleY().setWidth(2).add();
 
@@ -240,14 +240,8 @@ class JMessagePanel extends JPanel {
         b0.setEnabled(false);
 
         //--------------------------------------------------------------------------------------------------------------
-        Dimension d0 = gpa.getPreferredSize();
-        d0.width = 600;
-        gpa.setPreferredSize(d0);
         gp0.load(0,0, gpa).setWeight(0.6f,1).add();
 
-        Dimension d2 = gpb.getPreferredSize();
-        d2.width = 400;
-        gpb.setPreferredSize(d2);
         gp0.load(1,0, gpb).setWeight(0.4f,1).setLeftPad(20).add();
 
         add(gp0,BorderLayout.CENTER);
