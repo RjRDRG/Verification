@@ -3,7 +3,7 @@ package generator.utils;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
-import generator.structures.Result;
+import structures.Result;
 
 import java.io.*;
 

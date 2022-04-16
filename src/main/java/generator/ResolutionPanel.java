@@ -3,10 +3,10 @@ package generator;
 import contract.structures.Endpoint;
 import contract.structures.Property;
 import contract.structures.PropertyKey;
-import generator.structures.Message;
-import generator.structures.Method;
-import generator.structures.Parameter;
-import generator.structures.Result;
+import structures.Message;
+import structures.Method;
+import structures.Parameter;
+import structures.Result;
 import generator.ui.*;
 import resolution.structures.Resolution;
 
@@ -121,18 +121,17 @@ public class ResolutionPanel extends JPanel {
         Result result = new Result();
 
         for(int i=0; i<v0.getNumberOfRows(); i++) {
-            Method method = new Method(Endpoint.fromString((String) t0.getValueAt(i,0)), Endpoint.fromString((String) t0.getValueAt(i,1)));
+            Method method = new Method((String) t0.getValueAt(i,0), (String) t0.getValueAt(i,1));
             for (int j=0; j<v0.getNumberOfColumns(); j++) {
                 JMessagePanel messagePanel = v0.getPanel(i,j);
                 if(messagePanel != null) {
                     List<Parameter> parameters = new ArrayList<>();
                     for (Object[] row : messagePanel.t2.getValues()) {
-                        System.out.println(parameters);
                         parameters.add(new Parameter(
-                                ((Property)row[0]).key.toString(),((Resolution)row[1]).toString()
+                                ((Property)row[0]).key.toString(),((Resolution)row[1]).resolution
                         ));
                     }
-                    Message message = new Message(t0.getColumnName(j+2), (String) t0.getValueAt(i,j+2), parameters);
+                    Message message = new Message(t0.getColumnName(j+2).replace("Response : ", ""), (String) t0.getValueAt(i,j+2), parameters);
                     method.addMessage(message);
                 }
             }

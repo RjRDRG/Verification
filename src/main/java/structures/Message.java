@@ -1,4 +1,4 @@
-package generator.structures;
+package structures;
 
 import java.util.List;
 
@@ -8,12 +8,12 @@ public class Message {
     public final static String RESPONSE = "response";
 
     public String type;
-    public String priorType;
+    public String typePrior;
     public List<Parameter> parameters;
 
-    public Message(String type, String priorType, List<Parameter> parameters) {
+    public Message(String type, String typePrior, List<Parameter> parameters) {
         this.type = type;
-        this.priorType = priorType;
+        this.typePrior = typePrior;
         this.parameters = parameters;
     }
 
@@ -34,12 +34,12 @@ public class Message {
         this.type = type;
     }
 
-    public String getPriorType() {
-        return priorType;
+    public String getTypePrior() {
+        return typePrior;
     }
 
-    public void setPriorType(String priorType) {
-        this.priorType = priorType;
+    public void setTypePrior(String typePrior) {
+        this.typePrior = typePrior;
     }
 
     public List<Parameter> getParameters() {

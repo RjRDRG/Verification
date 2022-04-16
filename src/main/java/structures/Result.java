@@ -1,4 +1,4 @@
-package generator.structures;
+package structures;
 
 import java.util.LinkedList;
 import java.util.List;
