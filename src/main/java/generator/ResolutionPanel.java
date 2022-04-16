@@ -127,6 +127,7 @@ public class ResolutionPanel extends JPanel {
                 if(messagePanel != null) {
                     List<Parameter> parameters = new ArrayList<>();
                     for (Object[] row : messagePanel.t2.getValues()) {
+                        System.out.println(parameters);
                         parameters.add(new Parameter(
                                 ((Property)row[0]).key.toString(),((Resolution)row[1]).toString()
                         ));

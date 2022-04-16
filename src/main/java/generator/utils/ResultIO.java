@@ -11,17 +11,13 @@ public class ResultIO {
 
     static String RESULT_LOCATION = "./src/main/resources/result.yml";
 
-    public static void output(Result result) throws FileNotFoundException {
-        ResultIO.writeToYaml(result);
-    }
-
-    private static Result readFromYaml() throws FileNotFoundException {
+    public static Result readFromYaml() throws FileNotFoundException {
         InputStream inputStream = new FileInputStream(RESULT_LOCATION);
         Yaml yaml = new Yaml(new Constructor(Result.class));
         return yaml.load(inputStream);
     }
 
-    private static void writeToYaml(Result result) throws FileNotFoundException {
+    public static void writeToYaml(Result result) throws FileNotFoundException {
         PrintWriter writer = new PrintWriter(RESULT_LOCATION);
         DumperOptions options = new DumperOptions();
         options.setIndent(2);

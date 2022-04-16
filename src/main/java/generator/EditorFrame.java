@@ -40,7 +40,7 @@ public class EditorFrame extends JFrame {
             });
             resolutionPanel.submit.addActionListener(e1 -> {
                 try {
-                    ResultIO.output(resolutionPanel.getResult());
+                    ResultIO.writeToYaml(resolutionPanel.getResult());
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
