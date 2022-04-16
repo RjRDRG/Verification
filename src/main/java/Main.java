@@ -1,6 +1,6 @@
 import com.formdev.flatlaf.FlatDarculaLaf;
 import contract.OpenApiContract;
-import generator.EditorFrame;
+import editor.EditorFrame;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.ParseOptions;

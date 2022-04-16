@@ -6,6 +6,9 @@ public class Parameter {
     public String key;
     public String resolution;
 
+    public Parameter() {
+    }
+
     public Parameter(String key, String resolution) {
         this.key = key;
         this.resolution = resolution;

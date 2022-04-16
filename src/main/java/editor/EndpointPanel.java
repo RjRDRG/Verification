@@ -1,7 +1,7 @@
-package generator;
+package editor;
 
-import generator.ui.ButtonColumn;
-import generator.ui.JGridBagPanel;
+import ui.ButtonColumn;
+import ui.JGridBagPanel;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;

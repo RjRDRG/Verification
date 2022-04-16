@@ -1,10 +1,10 @@
-package generator;
+package editor;
 
 import contract.IContract;
 import contract.structures.Endpoint;
-import generator.ui.JGridBagPanel;
-import generator.ui.JViewerPanel;
-import generator.utils.ResultIO;
+import ui.JGridBagPanel;
+import ui.JViewerPanel;
+import io.ResultIO;
 
 import javax.swing.*;
 import java.awt.*;

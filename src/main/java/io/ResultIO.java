@@ -1,4 +1,4 @@
-package generator.utils;
+package io;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -11,8 +11,8 @@ public class ResultIO {
 
     static String RESULT_LOCATION = "./src/main/resources/result.yml";
 
-    public static Result readFromYaml() throws FileNotFoundException {
-        InputStream inputStream = new FileInputStream(RESULT_LOCATION);
+    public static Result readFromYaml(String path) throws FileNotFoundException {
+        InputStream inputStream = new FileInputStream(path);
         Yaml yaml = new Yaml(new Constructor(Result.class));
         return yaml.load(inputStream);
     }

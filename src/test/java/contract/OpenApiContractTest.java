@@ -17,7 +17,7 @@ import java.util.*;
 
 class OpenApiContractTest {
 
-    static String basePath = "./src/main/resources/contract/";
+    static String basePath = "./src/test/resources/contract/";
 
     IContract contract;
 

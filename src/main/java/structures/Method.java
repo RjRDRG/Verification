@@ -14,6 +14,9 @@ public class Method {
 
     public List<Message> messages;
 
+    public Method() {
+    }
+
     public Method(String endpoint, String endpointPrior) {
         this.endpoint = endpoint;
         this.endpointPrior = endpointPrior;

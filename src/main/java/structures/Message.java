@@ -11,6 +11,9 @@ public class Message {
     public String typePrior;
     public List<Parameter> parameters;
 
+    public Message() {
+    }
+
     public Message(String type, String typePrior, List<Parameter> parameters) {
         this.type = type;
         this.typePrior = typePrior;

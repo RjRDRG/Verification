@@ -1,4 +1,4 @@
-package generator;
+package editor;
 
 import contract.structures.Endpoint;
 import contract.structures.Property;
@@ -7,8 +7,10 @@ import structures.Message;
 import structures.Method;
 import structures.Parameter;
 import structures.Result;
-import generator.ui.*;
-import resolution.structures.Resolution;
+import structures.Resolution;
+import ui.ButtonColumn;
+import ui.JGridBagPanel;
+import ui.JViewerPanel;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;

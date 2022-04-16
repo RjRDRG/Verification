@@ -1,4 +1,4 @@
-package resolution.structures;
+package structures;
 
 import contract.structures.PropertyKey;
 
@@ -12,21 +12,19 @@ public class Resolution {
     public static String TYPE = "type=";
 
     public final String resolution;
-    public final Set<String> tags;
 
-    private Resolution(String resolution, Set<String> tags) {
+    private Resolution(String resolution) {
         this.resolution = resolution;
-        this.tags = tags;
     }
 
-    public static Resolution linkResolution(PropertyKey key, String... tags) {
+    public static Resolution linkResolution(PropertyKey key) {
         String resolution = LINK + key.toString();
-        return new Resolution(resolution, Set.of(tags));
+        return new Resolution(resolution);
     }
 
-    public static Resolution valueResolution(String value, String... tags) {
+    public static Resolution valueResolution(String value) {
         String resolution = VALUE + value;
-        return new Resolution(resolution, Set.of(tags));
+        return new Resolution(resolution);
     }
 
     @Override
