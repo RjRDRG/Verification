@@ -25,7 +25,7 @@ public class JViewerPanel<T extends JPanel> extends JPanel {
     }
 
     public JViewerPanel(int numberOfColumns) {
-        this(numberOfColumns,"EMPTY");
+        this(numberOfColumns,"");
     }
 
     public int flattenCoordinates(int row, int column) {
@@ -77,7 +77,6 @@ public class JViewerPanel<T extends JPanel> extends JPanel {
 
     private JPanel makeEmptyPanel(String message) {
         JPanel empty = new JPanel();
-        empty.setBackground(new Color(70, 73, 75));
         empty.setBorder(BorderFactory.createLineBorder(new Color(97, 99, 101)));
         empty.setLayout(new GridBagLayout());
         JLabel label = new JLabel(message);
