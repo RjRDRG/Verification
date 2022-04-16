@@ -112,6 +112,7 @@ public class ResolutionPanel extends JPanel {
         add(gp0,BorderLayout.CENTER);
     }
 
+
 }
 
 class JMessagePanel extends JPanel {
@@ -194,7 +195,10 @@ class JMessagePanel extends JPanel {
                 ((JPropertyPanel)v0.getActive()).viewProperty(t1Selected);
 
                 b0.setText("Link Properties");
-                b0.setEnabled(true);
+                if(t0Selected.isCompatible(t1Selected))
+                    b0.setEnabled(true);
+                else
+                    b0.setEnabled(false);
             }
 
             b0.revalidate();

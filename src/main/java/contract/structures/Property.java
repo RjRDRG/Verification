@@ -48,4 +48,8 @@ public class Property {
     public void setSolved(boolean solved) {
         this.solved = solved;
     }
+
+    public boolean isCompatible(Property property) {
+        return Objects.equals(primitive,property.primitive) && Objects.equals(format,property.format);
+    }
 }

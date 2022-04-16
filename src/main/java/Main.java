@@ -4,7 +4,6 @@ import generator.EditorFrame;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.ParseOptions;
-import generator.old.InitPanel;
 
 import javax.swing.*;
 
